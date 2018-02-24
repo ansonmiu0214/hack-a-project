@@ -1,0 +1,56 @@
+/* Resets */
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+#court {
+  position: absolute;
+  border: 1px black solid;
+  background-image: url('../img/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 800px;
+  height: 800px;
+}
+
+.player {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: black 1px solid;
+  border-radius: 30px;
+  background-color: blue;
+  -webkit-transform: translate(0px, 0px);
+          transform: translate(0px, 0px);
+}
+
+.ball {
+  background-color: orange;
+}
+
+/* Initial states */
+/* #pg {
+  top: 400px;
+  left: 400px;
+}
+
+#sg {
+  top: 300px;
+  left: 100px;
+}
+
+#sf {
+  top: 300px;
+  left: 700px;
+}
+
+#pf {
+  top: 200px;
+  left: 300px;
+}
+
+#c {
+  top: 50px;
+  left: 500px;
+} */
