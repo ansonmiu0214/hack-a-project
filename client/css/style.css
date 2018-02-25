@@ -5,7 +5,7 @@ html, body {
 }
 
 #court {
-  position: absolute;
+  /* position: absolute; */
   border: 1px black solid;
   background-image: url('../img/background.jpg');
   background-repeat: no-repeat;
@@ -27,6 +27,14 @@ html, body {
 
 .ball {
   background-color: orange;
+}
+
+#svg {
+  position: absolute;
+  top: 0px; 
+  left: 0px; 
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Initial states */
