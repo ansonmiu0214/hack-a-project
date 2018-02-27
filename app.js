@@ -16,6 +16,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
  * Endpoints.
  */
 
+// Get JSON of play
+app.get('/api/play', (req, res) => {
+  
+})
+
+// Save new play to server
+app.post('/api/play', (req, res) => {
+  
+})
+
 // Landing
 app.get('/', (req, res, next) => {
   console.log('Initialised!')
