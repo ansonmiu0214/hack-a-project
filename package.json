@@ -1,0 +1,25 @@
+{
+  "name": "hack-a-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ansonmiu0214/hack-a-project.git"
+  },
+  "author": "Anson Miu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ansonmiu0214/hack-a-project/issues"
+  },
+  "homepage": "https://github.com/ansonmiu0214/hack-a-project#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "yarn": "^1.5.1"
+  }
+}
