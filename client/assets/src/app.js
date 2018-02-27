@@ -1,24 +1,37 @@
 // DOM elements
 const court = document.getElementById('court')
 const initBallHandler = document.getElementById('initBallHandler')
-const resetState = document.getElementById('resetState')
+const btnResetState = document.getElementById('resetState')
+const btnSaveState = document.getElementById('saveState')
+const btnReplay = document.getElementById('replay')
 
 // Data initialisations
-const defaultConfig = {
-  'pg': { x: 330, y: 550, hasBall: true},
-  'sg': { x: 100, y: 450, hasBall: false},
-  'sf': { x: 560, y: 450, hasBall: false},
-  'pf': { x: 230, y: 380, hasBall: false},
-  'c': { x: 400, y: 250, hasBall: false}
-}
-
 const playersOnDOM = { }
-
-// Deep clone
+const defaultConfig = Object.freeze({
+  pg: { x: 330, y: 550, hasBall: true},
+  sg: { x: 100, y: 450, hasBall: false},
+  sf: { x: 560, y: 450, hasBall: false},
+  pf: { x: 230, y: 380, hasBall: false},
+  c:  { x: 400, y: 250, hasBall: false}
+})
 let startState = JSON.parse(JSON.stringify(defaultConfig))
 
+const playData = {
+  startState: startState,
+  transitions: [],
+}
+
+let currTransition = {
+  pg: { path: [], timeout: 0, nextState: {} },
+  sg: { path: [], timeout: 0, nextState: {} },
+  sf: { path: [], timeout: 0, nextState: {} },
+  pf: { path: [], timeout: 0, nextState: {} },
+  c:  { path: [], timeout: 0, nextState: {} }
+}
+
 // Constants and flags
-const FRAME_MILLIS = 2000
+const FRAME_MILLIS = 1000
+const MARKER_DIAMETER = 40
 let isInitFlag = true
 
 // Implement draggable via interactjs for players
@@ -44,7 +57,8 @@ function markerMoveHandler(event) {
 }
 
 function markerEndHandler(event) {
-  console.log(startState)
+  if (isInitFlag) console.log(startState)
+  else endMoveDevHandler(event)
 }
 
 /**
@@ -58,14 +72,14 @@ function markerMoveInit(event) {
   // Old coordinates
   const old_dx = parseFloat(target.getAttribute('data-x'))
   const old_dy = parseFloat(target.getAttribute('data-y'))
-  const old_x = null
-  const old_y = null
+  const old_x = target.offsetLeft + old_dx + (MARKER_DIAMETER / 2)
+  const old_y = target.offsetTop + old_dy + (MARKER_DIAMETER / 2)
 
   // Derive new coordinates
-  const new_dx = old_dx + event.dx
-  const new_dy = old_dy + event.dy
-  const new_x = 0
-  const new_y = 0
+  const new_dx = (old_dx || 0) + event.dx
+  const new_dy = (old_dy || 0) + event.dy
+  const new_x = target.offsetLeft + new_dx + (MARKER_DIAMETER / 2)
+  const new_y = target.offsetTop + new_dy + (MARKER_DIAMETER / 2) 
 
   // Translate based on data-x and data-y attributes
   target.style.webkitTransform = target.style.transform = `translate(${new_dx}px, ${new_dy}px)`
@@ -77,6 +91,39 @@ function markerMoveInit(event) {
   // Update start state for player
   startState[id].x = new_x
   startState[id].y = new_y
+}
+
+function markerMoveDev(event) {
+  const target = event.target
+  const id = target.id
+
+  // Old coordinates
+  const old_dx = parseFloat(target.getAttribute('data-x'))
+  const old_dy = parseFloat(target.getAttribute('data-y'))
+  const old_x = target.offsetLeft + old_dx + (MARKER_DIAMETER / 2)
+  const old_y = target.offsetTop + old_dy + (MARKER_DIAMETER / 2)
+
+  // Derive new coordinates
+  const new_dx = (old_dx || 0) + event.dx
+  const new_dy = (old_dy || 0) + event.dy
+  const new_x = target.offsetLeft + new_dx + (MARKER_DIAMETER / 2)
+  const new_y = target.offsetTop + new_dy + (MARKER_DIAMETER / 2) 
+
+  // Translate based on data-x and data-y attributes
+  target.style.webkitTransform = target.style.transform = `translate(${new_dx}px, ${new_dy}px)`
+
+  // Update data attributes for stateful memory
+  target.setAttribute('data-x', new_dx)
+  target.setAttribute('data-y', new_dy)
+
+  // Add midpoint & endpoint (dx & dy)
+  currTransition[id].path.push({ dx: event.dx, dy: event.dy })
+}
+
+function endMoveDevHandler(event) {
+  const id = event.target.id
+  currTransition[id].timeout = FRAME_MILLIS / currTransition[id].path.length
+  console.log(currTransition)
 }
 
 function init() {
@@ -92,7 +139,10 @@ function init() {
 
   initBallHandler.addEventListener('change', changedInitBallHandler)
 
-  resetState.addEventListener('click', resetDefaultState)
+  btnResetState.addEventListener('click', resetDefaultState)
+  btnSaveState.addEventListener('click', saveDefaultState)
+  btnReplay.addEventListener('click', replay)
+
 }
 
 function generatePlayers() {
@@ -140,6 +190,11 @@ function resetDefaultState(event) {
   event.preventDefault()
 }
 
+function saveDefaultState(event) {
+  isInitFlag = false
+  event.preventDefault()
+}
+
 function getCurrentBallHandler(state) {
   for (let player in state) {
     if (state[player].hasBall) return player
@@ -164,6 +219,39 @@ function renderState(state) {
     marker.className = ''
     marker.classList.add('player')
     if (coords.hasBall) marker.classList.add('ball')
+  }
+}
+
+function replay(event) {
+  // Render start state
+  renderState(startState)
+
+  // Show transition
+  for (let player in playersOnDOM) movePlayer(playersOnDOM[player])
+}
+
+function movePlayer(marker, count = 0) {
+  const data = currTransition[marker.id]
+  const timeout = data.timeout
+  const path = data.path
+  const path_length = path.length
+  if (path_length > 0) {
+    setTimeout(() => {
+      // Get dx & dy
+      const dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx
+      const dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy
+
+      // Apply transform
+      marker.style.transform = marker.style.webkitTransform = `translate(${dx}px, ${dy}px)`
+
+      // Update data-x and data-y attributes
+      marker.setAttribute('data-x', dx)
+      marker.setAttribute('data-y', dy)
+
+      // Recurse next path
+      console.log(count)
+      if (count + 1 < path_length) movePlayer(marker, count + 1)
+    }, timeout)
   }
 }
 
