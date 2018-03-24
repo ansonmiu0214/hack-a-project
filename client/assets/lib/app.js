@@ -1,34 +1,64 @@
 'use strict';
 
-var _defaultCoords;
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var app = angular.module('playmaker', ['ui.router']);
 
 // DOM elements
 var court = document.getElementById('court');
+// const btnReplay = document.getElementById('replay')
 
 // Data initialisations
-var defaultCoords = (_defaultCoords = {
-  'pg': { 'x': 0, 'y': 0 }
-}, _defineProperty(_defaultCoords, 'pg', { 'x': 50, 'y': 50 }), _defineProperty(_defaultCoords, 'pg', { 'x': 100, 'y': 100 }), _defineProperty(_defaultCoords, 'pg', { 'x': 150, 'y': 150 }), _defineProperty(_defaultCoords, 'pg', { 'x': 200, 'y': 200 }), _defaultCoords);
+var playersOnDOM = {};
+var defaultConfig = Object.freeze({
+  pg: { x: 330, y: 550, hasBall: true },
+  sg: { x: 100, y: 450, hasBall: false },
+  sf: { x: 560, y: 450, hasBall: false },
+  pf: { x: 230, y: 380, hasBall: false },
+  c: { x: 400, y: 250, hasBall: false }
+});
+var startState = JSON.parse(JSON.stringify(defaultConfig));
 
-function init() {
-  // Render players
-  generatePlayers();
-}
+var playData = {
+  startState: startState,
+  transitions: []
+};
 
-function generatePlayers() {
-  console.log('generate players');
-  for (var player in defaultCoords) {
-    var marker = document.createElement('div');
-    marker.id = player;
-    marker.className = 'player';
-    marker.setAttribute('style', 'left: ' + player.x + 'px; top: ' + player.y + 'px');
-    marker.setAttribute('data-x', 0);
-    marker.setAttribute('data-y', 0);
-    marker.innerHTML = player;
-    court.appendChild(marker);
-  }
-}
+var currTransition = {
+  pg: { path: [], timeout: 0, nextState: {} },
+  sg: { path: [], timeout: 0, nextState: {} },
+  sf: { path: [], timeout: 0, nextState: {} },
+  pf: { path: [], timeout: 0, nextState: {} },
+  c: { path: [], timeout: 0, nextState: {} }
 
-init();
+  // Constants and flags
+};var FRAME_MILLIS = 1000;
+var MARKER_DIAMETER = 40;
+
+// Components
+app.component('init', {
+  templateUrl: '/assets/views/init.html',
+  controller: 'InitController'
+});
+
+app.component('dev', {
+  templateUrl: '/assets/views/dev.html',
+  controller: 'DevController'
+});
+
+// States
+app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+  // Register states
+  $stateProvider.state({
+    name: 'init',
+    url: '/',
+    component: 'init'
+  });
+
+  $stateProvider.state({
+    name: 'dev',
+    url: '/',
+    component: 'dev'
+  });
+
+  // Default route
+  $urlRouterProvider.otherwise('/');
+}]);

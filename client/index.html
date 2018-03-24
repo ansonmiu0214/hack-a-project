@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="playmaker">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,67 +40,22 @@
         </div> <!-- // #court -->
     
         <div class="wrapper-component" id="ctrls">
-          <div class="card ctrl-card" id="initCtrls">
-            <h5 class="card-header">Setup</h5>
-            <div class="card-body">
-              <form>
-                <div class="form-group">
-                  <label for="ballHandler">Ball Handler</label>
-                  <select id="initBallHandler" class="form-control"></select>
-                </div> <!-- // .form-group -->
-
-                <div class="btn-group d-flex" role="group" aria-label="Basic example">
-                  <button class="btn btn-danger" id="resetState">Reset</button>
-                  <button class="btn btn-primary" id="saveState">Save</button>
-                </div> <!-- // .btn-group -->
-              </form> <!-- // form -->
-
-    
-            </div> <!-- // .card-body -->
-          </div> <!-- // #initCtrls -->
-    
-          <div class="card ctrl-card" id="devCtrls">
-            <h5 class="card-header">Tools</h5>
-            <div class="card-body">
-              <div class="btn-group-vertical" id="markerCtrls">
-                <button class="btn btn-secondary" id="move">Move</button>
-                <button class="btn btn-secondary" id="screen">Screen</button>
-                <button class="btn btn-secondary" id="pass">Pass</button>
-              </div> <!-- // #markerCtrls -->
-
-              <div class="btn-group-vertical" id="frameCtrls">
-                <button class="btn btn-secondary" id="undoFrame">Undo Frame</button>
-                <button class="btn btn-secondary" id="saveFrame">Save Frame</button>
-                <button class="btn btn-secondary" id="replay">Replay</button>
-              </div> <!-- // #frameCtrls -->
-
-            </div> <!-- // .card-body -->
-          </div> <!-- // #devCtrls -->
+          <ui-view></ui-view>
         </div> <!-- // #ctrls -->
       </div> <!-- // #wrapper -->
   </div> <!-- // .container -->
   
-
-  <!-- <button id="replay">Replay</button>
-
-  <div id="court">
-      <div class="player ball" id="pg"></div>
-  <div class="player" id="sg"></div>
-  <div class="player" id="sf"></div>
-  <div class="player" id="pf"></div>
-  <div class="player" id="c"></div>
-  </div> -->
-
-
   <!-- External dependencies -->
   <script src="/node_modules/jquery/dist/jquery.slim.min.js"></script>
   <script src="/node_modules/popper.js/dist/umd/popper.min.js"></script>
-  <!-- <script src="/node_modules/angular/angular.js"></script> -->
-  <!-- <script src="/node_modules/angular-ui-router/release/angular-ui-router.js"></script>   -->
+  <script src="/node_modules/angular/angular.js"></script>
+  <script src="/node_modules/angular-ui-router/release/angular-ui-router.js"></script>  
   <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="/node_modules/interactjs/dist/interact.js"></script>
 
   <!-- Controllers -->
-  <script src="/assets/src/app.js"></script>
+  <script src="/assets/lib/app.js"></script>
+  <script src="/assets/lib/init.js"></script>
+  <script src="/assets/lib/dev.js"></script>
 </body>
 </html>
