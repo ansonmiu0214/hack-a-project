@@ -11,26 +11,13 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   var btnUndo = document.getElementById('undoFrame');
   var btnSave = document.getElementById('saveFrame');
   var btnReplay = document.getElementById('replay');
+  var penMove = document.getElementById('move');
+  var penScreen = document.getElementById('screen');
+  var penPass = document.getElementById('pass');
+  var pens = [penMove, penScreen, penPass];
 
-  // Initialise disabled status for btnReplay
-  btnReplay.disabled = true;
-
-  // Implement draggable via interactjs for players
-  interact('.player').draggable({
-    inertia: false,
-    max: Infinity,
-    autoscroll: true,
-
-    // Keep element within parent's boundary
-    restrict: {
-      restriction: 'parent',
-      endOnly: true,
-      elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-    },
-
-    onmove: markerMoveHandler,
-    onend: markerEndHandler
-  });
+  // Pen
+  var currentPen = null;
 
   function markerMoveHandler(event) {
     var target = event.target;
@@ -56,30 +43,86 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     target.setAttribute('data-y', new_dy);
 
     // Add midpoints & endpoint (dx & dy)
-    currTransition[id].path.push({ dx: event.dx, dy: event.dy });
+    var dx = event.dx / SMOOTHNESS;
+    var dy = event.dy / SMOOTHNESS;
+
+    for (var i = 0; i < SMOOTHNESS; ++i) {
+      currTransition[id].path.push({ dx: dx, dy: dy });
+    }
   }
 
   function markerEndHandler(event) {
-    var id = event.target.id;
-    currTransition[id].timeout = FRAME_MILLIS / currTransition[id].path.length;
-    console.log(currTransition);
-  }
+    // Parse data
+    var target = event.target;
+    var id = target.id;
+    var currBallHander = getCurrentBallHandler(parseStateFromTransition(currTransition));
 
-  btnSave.addEventListener('click', saveFrame);
+    // Compute frame timeout: total_transition_duration / num_of_transitions
+    var timeout = FRAME_MILLIS / currTransition[id].path.length;
+
+    // Derive new coordinates
+    var new_x = target.offsetLeft + parseFloat(target.getAttribute('data-x')) + MARKER_DIAMETER / 2;
+    var new_y = target.offsetTop + parseFloat(target.getAttribute('data-y')) + MARKER_DIAMETER / 2;
+
+    // Formulate a new state for the player that moved
+    var nextState = {
+      x: new_x,
+      y: new_y,
+      hasBall: currBallHander === id
+    };
+
+    console.log(nextState);
+
+    // Assign timeout and next state of moved player
+    currTransition[id].timeout = timeout;
+    currTransition[id].nextState = nextState;
+  }
 
   /**
    * Saves currTransition into play data and resets
    * currTransition into a blank slate.
    */
   function saveFrame(event) {
+    // Add transition to play data
     playData.transitions.push(currTransition);
-    currTransition = JSON.parse(JSON.stringify(newTransition));
+
+    console.log(lastState);
+    // Update last-updated state from this saved transition
+    lastState = parseStateFromTransition(currTransition);
+    console.log(lastState);
+
+    // Reset 'current transition' to a blank slate
+    currTransition = initTransition(currTransition);
 
     // Enable replay button
     btnReplay.disabled = playData.transitions.length == 0;
   }
 
-  btnReplay.addEventListener('click', replay);
+  /**
+   * Returns a new transition with all paths/timeouts cleared but
+   * with nextState of each player inherited from its nextState
+   * as per @param transition.
+   */
+  function initTransition(transition) {
+    var currTransition = JSON.parse(JSON.stringify(newTransition));
+
+    for (var player in currTransition) {
+      currTransition[player].nextState = JSON.parse(JSON.stringify(transition[player].nextState));
+    }return currTransition;
+  }
+
+  /**
+   * Returns the next state of all the players as parsed from
+   * the data provided in @param transition.
+   */
+  function parseStateFromTransition(transition) {
+    var parsedState = {};
+
+    for (var player in transition) {
+      parsedState[player] = transition[player].nextState;
+    }return parsedState;
+  }
+
   function replay(event) {
     // Render start state
     renderState(startState);
@@ -98,7 +141,6 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   function replayFrames(transitions, maxCount) {
     var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-    console.log('ENTERING WITH COUNT ' + count);
     // Base case: no more frames to replay
     if (count == maxCount) return;
 
@@ -133,27 +175,92 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       var path = data.path;
       var path_length = path.length;
 
-      // Resolve on base cases
-      if (path_length == 0) resolve(true);
-      if (count == path_length) resolve(true);
+      if (path_length == 0 || count == path_length) {
+        // Resolve on base cases
+        resolve(true);
+      } else {
+        setTimeout(function () {
+          if (!path[count]) {
+            console.log('Undefined path count for ' + marker.id + ' count ' + count + ' length ' + path.length);
+          }
 
-      setTimeout(function () {
-        // Get dx & dy   
-        var dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx;
-        var dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy;
+          // Get dx & dy   
+          var dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx;
+          var dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy;
 
-        // Apply transform
-        marker.style.transform = marker.style.webkitTransform = 'translate(' + dx + 'px, ' + dy + 'px)';
+          // Apply transform
+          marker.style.transform = marker.style.webkitTransform = 'translate(' + dx + 'px, ' + dy + 'px)';
 
-        // Update data-x and data-y attributes
-        marker.setAttribute('data-x', dx);
-        marker.setAttribute('data-y', dy);
+          // Update data-x and data-y attributes
+          marker.setAttribute('data-x', dx);
+          marker.setAttribute('data-y', dy);
 
-        // Recursive call
-        movePlayer(transition, marker, count + 1).then(function (val) {
-          return resolve(val);
-        });
-      }, timeout);
+          // Recursive call
+          movePlayer(transition, marker, count + 1).then(function (val) {
+            return resolve(val);
+          });
+        }, timeout);
+      }
     });
   }
+
+  function applyNewPen(event) {
+    var target = event.target;
+    if (target !== currentPen) {
+      if (currentPen === penPass) enableDraggable();
+      if (target == penPass) disableDraggable();
+
+      currentPen.classList.remove('active');
+      target.classList.add('active');
+      currentPen = target;
+    }
+    event.preventDefault();
+  }
+
+  function enableDraggable() {
+    // Implement draggable via interactjs for players
+    interact('.player').draggable({
+      inertia: false,
+      max: Infinity,
+      autoscroll: true,
+
+      // Keep element within parent's boundary
+      restrict: {
+        restriction: 'parent',
+        endOnly: true,
+        elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+      },
+
+      onmove: markerMoveHandler,
+      onend: markerEndHandler
+    });
+  }
+
+  function disableDraggable() {
+    interact('.player').unset();
+  }
+
+  function init() {
+    // Set active pen to MOVE
+    penMove.classList.add('active');
+    currentPen = penMove;
+
+    // Enable draggability for players
+    enableDraggable();
+  }
+
+  /**
+   * DOM links
+   */
+  // Buttons
+  btnReplay.disabled = true;
+  btnSave.addEventListener('click', saveFrame);
+  btnReplay.addEventListener('click', replay);
+
+  // Pens
+  penMove.addEventListener('click', applyNewPen);
+  penScreen.addEventListener('click', applyNewPen);
+  penPass.addEventListener('click', applyNewPen);
+
+  init();
 }]);

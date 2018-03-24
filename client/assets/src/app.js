@@ -22,17 +22,18 @@ const newTransition = Object.freeze({
 })
 
 let startState = JSON.parse(JSON.stringify(defaultConfig))
+let lastState = null
+let currTransition = JSON.parse(JSON.stringify(newTransition))
 
-const playData = {
+let playData = {
   startState: startState,
   transitions: [],
 }
 
-let currTransition = JSON.parse(JSON.stringify(newTransition))
-
 // Constants and flags
-const FRAME_MILLIS = 800
+const FRAME_MILLIS = 700
 const MARKER_DIAMETER = 40
+const SMOOTHNESS = 2
 
 // Global functions
 function renderState(state) {
@@ -54,6 +55,24 @@ function renderState(state) {
     if (coords.hasBall) marker.classList.add('ball')
   }
 }
+
+function getCurrentBallHandler(state) {
+  for (let player in state) 
+    if (state[player].hasBall) return player
+  
+  return null
+}
+
+// Global events
+document.getElementById('saveJSON').addEventListener('click', (event) => {
+  const dataAsString = JSON.stringify(playData, null, 4)
+  const data = `text/json;charset=utf-8,${encodeURIComponent(dataAsString)}`
+  const dl = document.createElement('a')
+  dl.href = `data:${data}`
+  dl.download = 'play.json'
+  document.body.appendChild(dl)
+  dl.click()
+})
 
 // Components
 app.component('init', {
