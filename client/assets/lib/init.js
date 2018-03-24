@@ -72,24 +72,16 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
   }
 
   function saveDefaultState(event) {
+    // Initialise lastState from startState
+    lastState = JSON.parse(JSON.stringify(startState));
+
+    // Initialise nextStates of each player in current transition
+    for (var player in lastState) {
+      currTransition[player].nextState = JSON.parse(JSON.stringify(lastState[player]));
+    } // Change to play-development state
     $state.go('dev');
+
     event.preventDefault();
-  }
-
-  function init() {
-    // Render players
-    generatePlayers();
-
-    // Initialise setup form controls
-    for (var player in defaultConfig) {
-      var opt = document.createElement('option');
-      opt.innerHTML = player.toUpperCase();
-      initBallHandler.appendChild(opt);
-    }
-
-    initBallHandler.addEventListener('change', changedInitBallHandler);
-    btnResetState.addEventListener('click', resetDefaultState);
-    btnSaveState.addEventListener('click', saveDefaultState);
   }
 
   function generatePlayers() {
@@ -132,11 +124,20 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     startState[next].hasBall = true;
   }
 
-  function getCurrentBallHandler(state) {
-    for (var player in state) {
-      if (state[player].hasBall) return player;
+  function init() {
+    // Render players
+    generatePlayers();
+
+    // Initialise setup form controls
+    for (var player in defaultConfig) {
+      var opt = document.createElement('option');
+      opt.innerHTML = player.toUpperCase();
+      initBallHandler.appendChild(opt);
     }
-    return null;
+
+    initBallHandler.addEventListener('change', changedInitBallHandler);
+    btnResetState.addEventListener('click', resetDefaultState);
+    btnSaveState.addEventListener('click', saveDefaultState);
   }
 
   /**
