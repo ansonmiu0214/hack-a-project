@@ -5,8 +5,8 @@
   --marker-bg-color: blue;
   --marker-txt-color: white;
   --marker-border-color: black;
-  --ballhandler-bg-color: orange;
-  --ballhandler-txt-color: black;
+  --ballhandler-bg-color: rgb(207, 83, 0);
+  --ballhandler-txt-color: white;
 }
 
 #wrapper {
@@ -66,4 +66,14 @@
 .ctrl-card {
   margin-top: 3rem;
   margin-bottom: 3rem;
+}
+
+a {
+  cursor: pointer;
+}
+
+/* Use hover property to show passing option */
+.passCandidate:hover > div {
+  background-color: var(--ballhandler-bg-color);
+  color: var(--ballhandler-txt-color);
 }
