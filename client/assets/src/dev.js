@@ -68,8 +68,6 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       hasBall: currBallHander === id
     }
 
-    console.log(nextState)
-
     // Assign timeout and next state of moved player
     currTransition[id].timeout = timeout
     currTransition[id].nextState = nextState
@@ -126,7 +124,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     // Replay frames denoting maximum frame count
     const frameCount = playData.transitions.length
-    replayFrames(playData.transitions, frameCount)
+    replayFrames(startState, playData.transitions, frameCount)
   }
 
   /**
@@ -135,7 +133,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * transition is synchronous (but player movements within a specific
    * transition are ran asynchronously).
    */
-  function replayFrames(transitions, maxCount, count = 0) {
+  function replayFrames(prevState, transitions, maxCount, count = 0) {
     // Base case: no more frames to replay
     if (count == maxCount) return
 
@@ -144,12 +142,21 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     
     // Parse transition data
     const transition = transitions[count]
+    const currState = parseStateFromTransition(transition)
 
     // Move each player on DOM
     for (let player in playersOnDOM) 
       playerMovements.push(movePlayer(transition, playersOnDOM[player]))
 
-    Promise.all(playerMovements).then((res) => replayFrames(transitions, maxCount, count + 1))
+    Promise.all(playerMovements).then((res) => {
+      // Handle pass AFTER movement
+      const prevHandler = getCurrentBallHandler(prevState)
+      const currHandler = getCurrentBallHandler(currState)
+
+      if (prevHandler !== currHandler) renderPass(prevHandler, currHandler)
+
+      replayFrames(currState, transitions, maxCount, count + 1)
+    })
   }
   
   /**
@@ -197,8 +204,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   function applyNewPen(event) {
     const target = event.target
     if (target !== currentPen) {
-      if (currentPen === penPass) enableDraggable()
-      if (target == penPass) disableDraggable()
+      if (currentPen === penPass) disablePassMode()
+      if (target == penPass) enablePassMode()
 
       currentPen.classList.remove('active')
       target.classList.add('active')
@@ -207,7 +214,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     event.preventDefault()
   }
 
-  function enableDraggable() {
+  function disablePassMode() {
     // Implement draggable via interactjs for players
     interact('.player').draggable({
       inertia: false,
@@ -224,10 +231,73 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       onmove: markerMoveHandler,
       onend: markerEndHandler
     })
+
+    for (let player in playersOnDOM) removePassCandidate(playersOnDOM[player])
   }
 
-  function disableDraggable() {
+  function enablePassMode() {
+    // Disable player marker dragging ability
     interact('.player').unset()
+    
+    const currHandler = getCurrentBallHandler(parseStateFromTransition(currTransition))
+    for (let player in playersOnDOM) {
+      if (player !== currHandler) makePassCandidate(playersOnDOM[player])
+    }
+  }
+
+  function makePassCandidate(playerDOM) {
+    const currParent = playerDOM.parentNode
+    
+    // Return if player is already a candidate
+    if (currParent.id !== COURT_ID) return
+  
+    // Create anchor element with callback for pass candidate
+    const anchor = document.createElement('a')
+    anchor.classList.add('passCandidate')
+    anchor.addEventListener('click', (event) => makePass(event, playerDOM.id))
+
+    // Wrap anchor as parent of player
+    currParent.replaceChild(anchor, playerDOM)
+    anchor.appendChild(playerDOM)
+  }
+
+  function removePassCandidate(playerDOM) {
+    const currParent = playerDOM.parentNode
+
+    // Return if player is already not a candidate
+    if (currParent.id === COURT_ID) return
+
+    // Remove player and add it back to court's child list
+    const court = currParent.parentNode
+    currParent.removeChild(playerDOM)
+    court.appendChild(playerDOM)
+
+    // Remove anchor tag
+    court.removeChild(currParent)
+  }
+
+  function makePass(event, receiver) {
+    const passer = getCurrentBallHandler(parseStateFromTransition(currTransition))
+
+    // Update state
+    currTransition[passer].nextState.hasBall = false
+    currTransition[receiver].nextState.hasBall = true
+
+    // Update CSS
+    renderPass(passer, receiver)
+
+    // Update passing candidates (previous )
+    removePassCandidate(playersOnDOM[receiver])
+    makePassCandidate(playersOnDOM[passer])
+    event.preventDefault()
+  }
+
+  function renderPass(oldID, newID) {
+    const passer = playersOnDOM[oldID]
+    const receiver = playersOnDOM[newID]
+
+    passer.classList.remove('ball')
+    receiver.classList.add('ball')
   }
 
   function init() {
@@ -236,7 +306,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     currentPen = penMove
 
     // Enable draggability for players
-    enableDraggable()
+    disablePassMode()
   }
 
   /**

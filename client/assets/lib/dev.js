@@ -69,12 +69,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       x: new_x,
       y: new_y,
       hasBall: currBallHander === id
-    };
 
-    console.log(nextState);
-
-    // Assign timeout and next state of moved player
-    currTransition[id].timeout = timeout;
+      // Assign timeout and next state of moved player
+    };currTransition[id].timeout = timeout;
     currTransition[id].nextState = nextState;
   }
 
@@ -129,7 +126,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
     // Replay frames denoting maximum frame count
     var frameCount = playData.transitions.length;
-    replayFrames(playData.transitions, frameCount);
+    replayFrames(startState, playData.transitions, frameCount);
   }
 
   /**
@@ -138,8 +135,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
    * transition is synchronous (but player movements within a specific
    * transition are ran asynchronously).
    */
-  function replayFrames(transitions, maxCount) {
-    var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  function replayFrames(prevState, transitions, maxCount) {
+    var count = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
     // Base case: no more frames to replay
     if (count == maxCount) return;
@@ -149,12 +146,19 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
     // Parse transition data
     var transition = transitions[count];
+    var currState = parseStateFromTransition(transition);
 
     // Move each player on DOM
     for (var player in playersOnDOM) {
       playerMovements.push(movePlayer(transition, playersOnDOM[player]));
     }Promise.all(playerMovements).then(function (res) {
-      return replayFrames(transitions, maxCount, count + 1);
+      // Handle pass AFTER movement
+      var prevHandler = getCurrentBallHandler(prevState);
+      var currHandler = getCurrentBallHandler(currState);
+
+      if (prevHandler !== currHandler) renderPass(prevHandler, currHandler);
+
+      replayFrames(currState, transitions, maxCount, count + 1);
     });
   }
 
@@ -207,8 +211,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   function applyNewPen(event) {
     var target = event.target;
     if (target !== currentPen) {
-      if (currentPen === penPass) enableDraggable();
-      if (target == penPass) disableDraggable();
+      if (currentPen === penPass) disablePassMode();
+      if (target == penPass) enablePassMode();
 
       currentPen.classList.remove('active');
       target.classList.add('active');
@@ -217,7 +221,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     event.preventDefault();
   }
 
-  function enableDraggable() {
+  function disablePassMode() {
     // Implement draggable via interactjs for players
     interact('.player').draggable({
       inertia: false,
@@ -234,10 +238,77 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       onmove: markerMoveHandler,
       onend: markerEndHandler
     });
+
+    for (var player in playersOnDOM) {
+      removePassCandidate(playersOnDOM[player]);
+    }
   }
 
-  function disableDraggable() {
+  function enablePassMode() {
+    // Disable player marker dragging ability
     interact('.player').unset();
+
+    var currHandler = getCurrentBallHandler(parseStateFromTransition(currTransition));
+    for (var player in playersOnDOM) {
+      if (player !== currHandler) makePassCandidate(playersOnDOM[player]);
+    }
+  }
+
+  function makePassCandidate(playerDOM) {
+    var currParent = playerDOM.parentNode;
+
+    // Return if player is already a candidate
+    if (currParent.id !== COURT_ID) return;
+
+    // Create anchor element with callback for pass candidate
+    var anchor = document.createElement('a');
+    anchor.classList.add('passCandidate');
+    anchor.addEventListener('click', function (event) {
+      return makePass(event, playerDOM.id);
+    });
+
+    // Wrap anchor as parent of player
+    currParent.replaceChild(anchor, playerDOM);
+    anchor.appendChild(playerDOM);
+  }
+
+  function removePassCandidate(playerDOM) {
+    var currParent = playerDOM.parentNode;
+
+    // Return if player is already not a candidate
+    if (currParent.id === COURT_ID) return;
+
+    // Remove player and add it back to court's child list
+    var court = currParent.parentNode;
+    currParent.removeChild(playerDOM);
+    court.appendChild(playerDOM);
+
+    // Remove anchor tag
+    court.removeChild(currParent);
+  }
+
+  function makePass(event, receiver) {
+    var passer = getCurrentBallHandler(parseStateFromTransition(currTransition));
+
+    // Update state
+    currTransition[passer].nextState.hasBall = false;
+    currTransition[receiver].nextState.hasBall = true;
+
+    // Update CSS
+    renderPass(passer, receiver);
+
+    // Update passing candidates (previous )
+    removePassCandidate(playersOnDOM[receiver]);
+    makePassCandidate(playersOnDOM[passer]);
+    event.preventDefault();
+  }
+
+  function renderPass(oldID, newID) {
+    var passer = playersOnDOM[oldID];
+    var receiver = playersOnDOM[newID];
+
+    passer.classList.remove('ball');
+    receiver.classList.add('ball');
   }
 
   function init() {
@@ -246,7 +317,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     currentPen = penMove;
 
     // Enable draggability for players
-    enableDraggable();
+    disablePassMode();
   }
 
   /**

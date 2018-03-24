@@ -2,7 +2,6 @@ const app = angular.module('playmaker', ['ui.router'])
 
 // DOM elements
 const court = document.getElementById('court')
-// const btnReplay = document.getElementById('replay')
 
 // Data initialisations
 const playersOnDOM = { }
@@ -34,6 +33,7 @@ let playData = {
 const FRAME_MILLIS = 700
 const MARKER_DIAMETER = 40
 const SMOOTHNESS = 2
+const COURT_ID = 'court'
 
 // Global functions
 function renderState(state) {
