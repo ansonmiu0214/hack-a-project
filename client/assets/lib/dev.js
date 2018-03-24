@@ -8,7 +8,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
    * Setup
    */
   // DOM elements
+  var btnUndo = document.getElementById('undoFrame');
+  var btnSave = document.getElementById('saveFrame');
   var btnReplay = document.getElementById('replay');
+
+  // Initialise disabled status for btnReplay
+  btnReplay.disabled = true;
 
   // Implement draggable via interactjs for players
   interact('.player').draggable({
@@ -50,7 +55,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     target.setAttribute('data-x', new_dx);
     target.setAttribute('data-y', new_dy);
 
-    // Add midpoint & endpoint (dx & dy)
+    // Add midpoints & endpoint (dx & dy)
     currTransition[id].path.push({ dx: event.dx, dy: event.dy });
   }
 
@@ -60,47 +65,80 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     console.log(currTransition);
   }
 
+  btnSave.addEventListener('click', saveFrame);
+
+  /**
+   * Saves currTransition into play data and resets
+   * currTransition into a blank slate.
+   */
+  function saveFrame(event) {
+    playData.transitions.push(currTransition);
+    currTransition = JSON.parse(JSON.stringify(newTransition));
+
+    // Enable replay button
+    btnReplay.disabled = playData.transitions.length == 0;
+  }
+
   btnReplay.addEventListener('click', replay);
   function replay(event) {
     // Render start state
     renderState(startState);
 
-    // Show transition
-    for (var player in playersOnDOM) {
-      movePlayer(playersOnDOM[player]);
-    }
+    // Replay frames denoting maximum frame count
+    var frameCount = playData.transitions.length;
+    replayFrames(playData.transitions, frameCount);
   }
 
-  function renderState(state) {
+  /**
+   * Replay frames for @param transitions[@param count]. Makes use of 
+   * recursive resolution of the Promise array to ensure that each
+   * transition is synchronous (but player movements within a specific
+   * transition are ran asynchronously).
+   */
+  function replayFrames(transitions, maxCount) {
+    var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    console.log('ENTERING WITH COUNT ' + count);
+    // Base case: no more frames to replay
+    if (count == maxCount) return;
+
+    // Initialise array of MovePlayer promises
+    var playerMovements = [];
+
+    // Parse transition data
+    var transition = transitions[count];
+
+    // Move each player on DOM
     for (var player in playersOnDOM) {
-      var marker = playersOnDOM[player];
-      var coords = defaultConfig[player];
-
-      // Reset coordinates and data attributes
-      marker.setAttribute('style', 'left: ' + coords.x + 'px; top: ' + coords.y + 'px;');
-      marker.setAttribute('data-x', 0);
-      marker.setAttribute('data-y', 0);
-
-      // Reset transforms
-      marker.style.webkitTransform = marker.style.transform = 'translate(0px, 0px)';
-
-      // Reset class lists
-      marker.className = '';
-      marker.classList.add('player');
-      if (coords.hasBall) marker.classList.add('ball');
-    }
+      playerMovements.push(movePlayer(transition, playersOnDOM[player]));
+    }Promise.all(playerMovements).then(function (res) {
+      return replayFrames(transitions, maxCount, count + 1);
+    });
   }
 
-  function movePlayer(marker) {
-    var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  /**
+   * Moves the player @param marker from path data in the @param transition.
+   * Returns a Promise that the caller resolves to synchronise player movement
+   * per transition: movement within a transition can be async but caller must
+   * complete all player movement per transition in sync. Recursive call also
+   * handles Promise resolution.
+   */
+  function movePlayer(transition, marker) {
+    var count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-    var data = currTransition[marker.id];
-    var timeout = data.timeout;
-    var path = data.path;
-    var path_length = path.length;
-    if (path_length > 0) {
+    return new Promise(function (resolve, reject) {
+      // Parse data
+      var data = transition[marker.id];
+      var timeout = data.timeout;
+      var path = data.path;
+      var path_length = path.length;
+
+      // Resolve on base cases
+      if (path_length == 0) resolve(true);
+      if (count == path_length) resolve(true);
+
       setTimeout(function () {
-        // Get dx & dy
+        // Get dx & dy   
         var dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx;
         var dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy;
 
@@ -111,10 +149,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
         marker.setAttribute('data-x', dx);
         marker.setAttribute('data-y', dy);
 
-        // Recurse next path
-        console.log(count);
-        if (count + 1 < path_length) movePlayer(marker, count + 1);
+        // Recursive call
+        movePlayer(transition, marker, count + 1).then(function (val) {
+          return resolve(val);
+        });
       }, timeout);
-    }
+    });
   }
 }]);

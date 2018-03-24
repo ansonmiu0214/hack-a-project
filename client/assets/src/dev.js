@@ -6,7 +6,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * Setup
    */
   // DOM elements
+  const btnUndo = document.getElementById('undoFrame')
+  const btnSave = document.getElementById('saveFrame')
   const btnReplay = document.getElementById('replay')
+
+  // Initialise disabled status for btnReplay
+  btnReplay.disabled = true
   
   // Implement draggable via interactjs for players
   interact('.player').draggable({
@@ -48,7 +53,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     target.setAttribute('data-x', new_dx)
     target.setAttribute('data-y', new_dy)
   
-    // Add midpoint & endpoint (dx & dy)
+    // Add midpoints & endpoint (dx & dy)
     currTransition[id].path.push({ dx: event.dx, dy: event.dy })
   }
 
@@ -57,44 +62,76 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     currTransition[id].timeout = FRAME_MILLIS / currTransition[id].path.length
     console.log(currTransition)
   }
+
+  btnSave.addEventListener('click', saveFrame)
   
+  /**
+   * Saves currTransition into play data and resets
+   * currTransition into a blank slate.
+   */
+  function saveFrame(event) {
+    playData.transitions.push(currTransition)
+    currTransition = JSON.parse(JSON.stringify(newTransition))
+
+    // Enable replay button
+    btnReplay.disabled = playData.transitions.length == 0
+  }
+
   btnReplay.addEventListener('click', replay)
   function replay(event) {
     // Render start state
     renderState(startState)
-  
-    // Show transition
-    for (let player in playersOnDOM) movePlayer(playersOnDOM[player])
+
+    // Replay frames denoting maximum frame count
+    const frameCount = playData.transitions.length
+    replayFrames(playData.transitions, frameCount)
   }
 
-  function renderState(state) {
-    for (let player in playersOnDOM) {
-      const marker = playersOnDOM[player]
-      const coords = defaultConfig[player]
-  
-      // Reset coordinates and data attributes
-      marker.setAttribute('style', `left: ${coords.x}px; top: ${coords.y}px;`)
-      marker.setAttribute('data-x', 0)
-      marker.setAttribute('data-y', 0)
-  
-      // Reset transforms
-      marker.style.webkitTransform = marker.style.transform = 'translate(0px, 0px)'
-  
-      // Reset class lists
-      marker.className = ''
-      marker.classList.add('player')
-      if (coords.hasBall) marker.classList.add('ball')
-    }
+  /**
+   * Replay frames for @param transitions[@param count]. Makes use of 
+   * recursive resolution of the Promise array to ensure that each
+   * transition is synchronous (but player movements within a specific
+   * transition are ran asynchronously).
+   */
+  function replayFrames(transitions, maxCount, count = 0) {
+    console.log(`ENTERING WITH COUNT ${count}`)
+    // Base case: no more frames to replay
+    if (count == maxCount) return
+
+    // Initialise array of MovePlayer promises
+    const playerMovements = []
+    
+    // Parse transition data
+    const transition = transitions[count]
+
+    // Move each player on DOM
+    for (let player in playersOnDOM) 
+      playerMovements.push(movePlayer(transition, playersOnDOM[player]))
+
+    Promise.all(playerMovements).then((res) => replayFrames(transitions, maxCount, count + 1))
   }
   
-  function movePlayer(marker, count = 0) {
-    const data = currTransition[marker.id]
-    const timeout = data.timeout
-    const path = data.path
-    const path_length = path.length
-    if (path_length > 0) {
+  /**
+   * Moves the player @param marker from path data in the @param transition.
+   * Returns a Promise that the caller resolves to synchronise player movement
+   * per transition: movement within a transition can be async but caller must
+   * complete all player movement per transition in sync. Recursive call also
+   * handles Promise resolution.
+   */
+  function movePlayer(transition, marker, count = 0) {
+    return new Promise((resolve, reject) => {
+      // Parse data
+      const data = transition[marker.id]
+      const timeout = data.timeout
+      const path = data.path
+      const path_length = path.length
+
+      // Resolve on base cases
+      if (path_length == 0) resolve(true)
+      if (count == path_length) resolve(true)
+
       setTimeout(() => {
-        // Get dx & dy
+        // Get dx & dy   
         const dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx
         const dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy
   
@@ -104,11 +141,10 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
         // Update data-x and data-y attributes
         marker.setAttribute('data-x', dx)
         marker.setAttribute('data-y', dy)
-  
-        // Recurse next path
-        console.log(count)
-        if (count + 1 < path_length) movePlayer(marker, count + 1)
+
+        // Recursive call
+        movePlayer(transition, marker, count + 1).then((val) => resolve(val)) 
       }, timeout)
-    }
+    })
   }
 }])

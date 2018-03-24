@@ -15,6 +15,14 @@ var defaultConfig = Object.freeze({
   pf: { x: 230, y: 380, hasBall: false },
   c: { x: 400, y: 250, hasBall: false }
 });
+var newTransition = Object.freeze({
+  pg: { path: [], timeout: 0, nextState: {} },
+  sg: { path: [], timeout: 0, nextState: {} },
+  sf: { path: [], timeout: 0, nextState: {} },
+  pf: { path: [], timeout: 0, nextState: {} },
+  c: { path: [], timeout: 0, nextState: {} }
+});
+
 var startState = JSON.parse(JSON.stringify(defaultConfig));
 
 var playData = {
@@ -22,16 +30,32 @@ var playData = {
   transitions: []
 };
 
-var currTransition = {
-  pg: { path: [], timeout: 0, nextState: {} },
-  sg: { path: [], timeout: 0, nextState: {} },
-  sf: { path: [], timeout: 0, nextState: {} },
-  pf: { path: [], timeout: 0, nextState: {} },
-  c: { path: [], timeout: 0, nextState: {} }
+var currTransition = JSON.parse(JSON.stringify(newTransition));
 
-  // Constants and flags
-};var FRAME_MILLIS = 1000;
+// Constants and flags
+var FRAME_MILLIS = 800;
 var MARKER_DIAMETER = 40;
+
+// Global functions
+function renderState(state) {
+  for (var player in playersOnDOM) {
+    var marker = playersOnDOM[player];
+    var coords = defaultConfig[player];
+
+    // Reset coordinates and data attributes
+    marker.setAttribute('style', 'left: ' + coords.x + 'px; top: ' + coords.y + 'px;');
+    marker.setAttribute('data-x', 0);
+    marker.setAttribute('data-y', 0);
+
+    // Reset transforms
+    marker.style.webkitTransform = marker.style.transform = 'translate(0px, 0px)';
+
+    // Reset class lists
+    marker.className = '';
+    marker.classList.add('player');
+    if (coords.hasBall) marker.classList.add('ball');
+  }
+}
 
 // Components
 app.component('init', {
