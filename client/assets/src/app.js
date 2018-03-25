@@ -30,14 +30,14 @@ let playData = {
 }
 
 // Constants and flags
-const FRAME_MILLIS      = 700
-const PASS_MILLIS       = 400
+const FRAME_MILLIS      = 1000
+const PASS_MILLIS       = 800
 const MARKER_DIAMETER   = 40
-const SMOOTHNESS        = 1
+const SMOOTHNESS        = 2
 const COURT_ID          = 'court'
 const PLAYER_ID         = 'player'
 const BALL_ID           = 'ballhandler'
-const PASS_PATH_LENGTH  = 40
+const PASS_PATH_LENGTH  = 50
 const PASS_TIMEOUT      = PASS_MILLIS / PASS_PATH_LENGTH
 
 // Global functions

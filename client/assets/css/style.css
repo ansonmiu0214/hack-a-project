@@ -54,7 +54,7 @@
 }
 
 .player {
-  background-color: var(--marker-bg-color);
+  background-image: radial-gradient(var(--marker-bg-color) 0%, var(--marker-bg-color) 30%, black 100%);
 }
 
 .ball {
@@ -65,7 +65,7 @@
 }
 
 .ballhandler {
-  background-color: var(--ballhandler-bg-color);
+  background-image: radial-gradient(var(--ballhandler-bg-color) 0%, var(--ballhandler-bg-color) 30%, black 100%);
   color: var(--ballhandler-txt-color);
 }
 

@@ -31,14 +31,14 @@ var playData = {
   transitions: []
 
   // Constants and flags
-};var FRAME_MILLIS = 700;
-var PASS_MILLIS = 400;
+};var FRAME_MILLIS = 1500;
+var PASS_MILLIS = 1200;
 var MARKER_DIAMETER = 40;
-var SMOOTHNESS = 1;
+var SMOOTHNESS = 2;
 var COURT_ID = 'court';
 var PLAYER_ID = 'player';
 var BALL_ID = 'ballhandler';
-var PASS_PATH_LENGTH = 40;
+var PASS_PATH_LENGTH = 100;
 var PASS_TIMEOUT = PASS_MILLIS / PASS_PATH_LENGTH;
 
 // Global functions

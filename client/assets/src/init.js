@@ -7,7 +7,6 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
    */
   
   // DOM elements
-  const initBallHandler = document.getElementById('initBallHandler')
   const btnResetState = document.getElementById('resetState')
   const btnSaveState = document.getElementById('saveState')
 
@@ -111,7 +110,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   // Update initial ball handler in start state
   function changedInitBallHandler(event) {
     const curr = getCurrentBallHandler(startState)
-    const next = initBallHandler.value.toLowerCase()
+    const next = event.target.value
 
     // Update new ball handler on DOM
     playersOnDOM[curr].classList.remove(BALL_ID)
@@ -127,13 +126,29 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     generatePlayers()
 
     // Initialise setup form controls
+    // for (let player in defaultConfig) {
+    //   const opt = document.createElement('option')
+    //   opt.innerHTML = player.toUpperCase()
+    //   initBallHandler.appendChild(opt)
+    // }
+
     for (let player in defaultConfig) {
-      const opt = document.createElement('option')
-      opt.innerHTML = player.toUpperCase()
-      initBallHandler.appendChild(opt)
+      const formCheck = document.createElement('div')
+      formCheck.className = 'form-check'
+      formCheck.innerHTML = `<input class="form-check-input ballHandlerRadio"
+        type="radio" name="ballHandlerRadio" id="radio_${player}" 
+        value="${player}" ${player === 'pg' ? "checked" : ""}>`
+      formCheck.innerHTML += `<label class="form-check-label" 
+        for="radio_${player}">${player.toUpperCase()}</label>`
+      
+      document.getElementById('ballHandlers').appendChild(formCheck) 
     }
 
-    initBallHandler.addEventListener('change', changedInitBallHandler)
+    document.querySelectorAll('.ballHandlerRadio').forEach((radio, index) => {
+      radio.addEventListener('change', changedInitBallHandler)      
+    })
+
+    // initBallHandler.addEventListener('change', changedInitBallHandler)
     btnResetState.addEventListener('click', resetDefaultState)
     btnSaveState.addEventListener('click', saveDefaultState)
   }

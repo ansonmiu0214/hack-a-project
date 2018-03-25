@@ -9,7 +9,6 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
    */
 
   // DOM elements
-  var initBallHandler = document.getElementById('initBallHandler');
   var btnResetState = document.getElementById('resetState');
   var btnSaveState = document.getElementById('saveState');
 
@@ -112,7 +111,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
   // Update initial ball handler in start state
   function changedInitBallHandler(event) {
     var curr = getCurrentBallHandler(startState);
-    var next = initBallHandler.value.toLowerCase();
+    var next = event.target.value;
 
     // Update new ball handler on DOM
     playersOnDOM[curr].classList.remove(BALL_ID);
@@ -128,13 +127,26 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     generatePlayers();
 
     // Initialise setup form controls
+    // for (let player in defaultConfig) {
+    //   const opt = document.createElement('option')
+    //   opt.innerHTML = player.toUpperCase()
+    //   initBallHandler.appendChild(opt)
+    // }
+
     for (var player in defaultConfig) {
-      var opt = document.createElement('option');
-      opt.innerHTML = player.toUpperCase();
-      initBallHandler.appendChild(opt);
+      var formCheck = document.createElement('div');
+      formCheck.className = 'form-check';
+      formCheck.innerHTML = '<input class="form-check-input ballHandlerRadio"\n        type="radio" name="ballHandlerRadio" id="radio_' + player + '" \n        value="' + player + '" ' + (player === 'pg' ? "checked" : "") + '>';
+      formCheck.innerHTML += '<label class="form-check-label" \n        for="radio_' + player + '">' + player.toUpperCase() + '</label>';
+
+      document.getElementById('ballHandlers').appendChild(formCheck);
     }
 
-    initBallHandler.addEventListener('change', changedInitBallHandler);
+    document.querySelectorAll('.ballHandlerRadio').forEach(function (radio, index) {
+      radio.addEventListener('change', changedInitBallHandler);
+    });
+
+    // initBallHandler.addEventListener('change', changedInitBallHandler)
     btnResetState.addEventListener('click', resetDefaultState);
     btnSaveState.addEventListener('click', saveDefaultState);
   }
