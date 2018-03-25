@@ -27,11 +27,10 @@
   position: relative;
 }
 
-.player {
+.player, .ball {
   position: absolute;
   width: var(--marker-diameter);
   height: var(--marker-diameter);
-  background-color: var(--marker-bg-color);
   border: var(--marker-border-color) 1px solid;
   color: var(--marker-txt-color);
   text-align: center;
@@ -54,7 +53,18 @@
   user-select         : none;
 }
 
+.player {
+  background-color: var(--marker-bg-color);
+}
+
 .ball {
+  background-image: url('/assets/media/basketball.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+}
+
+.ballhandler {
   background-color: var(--ballhandler-bg-color);
   color: var(--ballhandler-txt-color);
 }
