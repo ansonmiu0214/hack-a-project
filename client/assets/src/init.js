@@ -79,7 +79,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
 
     // Change to play-development state
     $state.go('dev')
-    
+
     event.preventDefault()
   }
 
@@ -91,9 +91,8 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
       marker.id = player
 
       // Add player class (and ball if hasBall)
-      marker.classList.add('player')
-      marker.classList
-      if (coord.hasBall) marker.classList.add('ball')
+      marker.classList.add(PLAYER_ID)
+      if (coord.hasBall) marker.classList.add(BALL_ID)
 
       // Set offsets and data-attrs
       marker.setAttribute('style', `left: ${coord.x}px; top: ${coord.y}px;`)
@@ -115,8 +114,8 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     const next = initBallHandler.value.toLowerCase()
 
     // Update new ball handler on DOM
-    playersOnDOM[curr].classList.remove('ball')
-    playersOnDOM[next].classList.add('ball')
+    playersOnDOM[curr].classList.remove(BALL_ID)
+    playersOnDOM[next].classList.add(BALL_ID)
 
     // Update new ball handler on state
     startState[curr].hasBall = false

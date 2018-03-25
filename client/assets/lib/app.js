@@ -32,9 +32,14 @@ var playData = {
 
   // Constants and flags
 };var FRAME_MILLIS = 700;
+var PASS_MILLIS = 400;
 var MARKER_DIAMETER = 40;
-var SMOOTHNESS = 2;
+var SMOOTHNESS = 1;
 var COURT_ID = 'court';
+var PLAYER_ID = 'player';
+var BALL_ID = 'ballhandler';
+var PASS_PATH_LENGTH = 40;
+var PASS_TIMEOUT = PASS_MILLIS / PASS_PATH_LENGTH;
 
 // Global functions
 function renderState(state) {
@@ -52,8 +57,8 @@ function renderState(state) {
 
     // Reset class lists
     marker.className = '';
-    marker.classList.add('player');
-    if (coords.hasBall) marker.classList.add('ball');
+    marker.classList.add(PLAYER_ID);
+    if (coords.hasBall) marker.classList.add(BALL_ID);
   }
 }
 

@@ -39,6 +39,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     // Update data attributes for stateful memory
     target.setAttribute('data-x', new_dx)
     target.setAttribute('data-y', new_dy)
+
+    console.log(`final data: (${new_dx}, ${new_dy})`)
   
     // Add midpoints & endpoint (dx & dy)
     const dx = event.dx / SMOOTHNESS
@@ -77,14 +79,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * Saves currTransition into play data and resets
    * currTransition into a blank slate.
    */
-  function saveFrame(event) {
+  function saveFrame(event = null) {
     // Add transition to play data
     playData.transitions.push(currTransition)
 
-    console.log(lastState)
     // Update last-updated state from this saved transition
     lastState = parseStateFromTransition(currTransition)
-    console.log(lastState)
 
     // Reset 'current transition' to a blank slate
     currTransition = initTransition(currTransition)
@@ -119,12 +119,20 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   }
 
   function replay(event) {
+    btnReplay.classList.add('active')
+    btnReplay.disabled = true
+
     // Render start state
     renderState(startState)
 
     // Replay frames denoting maximum frame count
     const frameCount = playData.transitions.length
     replayFrames(startState, playData.transitions, frameCount)
+      .then((val) => {
+        // Re-enable replay button upon completion
+        btnReplay.classList.remove('active')
+        btnReplay.disabled = false
+      })
   }
 
   /**
@@ -134,28 +142,38 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * transition are ran asynchronously).
    */
   function replayFrames(prevState, transitions, maxCount, count = 0) {
-    // Base case: no more frames to replay
-    if (count == maxCount) return
+    return new Promise((resolve, reject) => {
+      // Base case: no more frames to replay
+      if (count == maxCount) {
+        resolve(true)
+      } else {
+        // Initialise array of MovePlayer promises
+        const playerMovements = []
 
-    // Initialise array of MovePlayer promises
-    const playerMovements = []
-    
-    // Parse transition data
-    const transition = transitions[count]
-    const currState = parseStateFromTransition(transition)
+        // Parse transition data
+        const transition = transitions[count]
+        const currState = parseStateFromTransition(transition)
 
-    // Move each player on DOM
-    for (let player in playersOnDOM) 
-      playerMovements.push(movePlayer(transition, playersOnDOM[player]))
+        // Move each player on DOM
+        for (let player in playersOnDOM) 
+          playerMovements.push(movePlayer(transition, playersOnDOM[player]))
 
-    Promise.all(playerMovements).then((res) => {
-      // Handle pass AFTER movement
-      const prevHandler = getCurrentBallHandler(prevState)
-      const currHandler = getCurrentBallHandler(currState)
+        Promise.all(playerMovements).then((res) => {
+          // Handle pass AFTER movement
+          const prevHandler = getCurrentBallHandler(prevState)
+          const currHandler = getCurrentBallHandler(currState)
 
-      if (prevHandler !== currHandler) renderPass(prevHandler, currHandler)
-
-      replayFrames(currState, transitions, maxCount, count + 1)
+          if (prevHandler !== currHandler) {
+            runPassAnimation(prevHandler, currHandler).then((res) => {
+              replayFrames(currState, transitions, maxCount, count + 1)
+                .then((val) => resolve(val))
+            })
+          } else {
+            replayFrames(currState, transitions, maxCount, count + 1)
+              .then((val) => resolve(val))
+          }
+        })
+      }
     })
   }
   
@@ -179,14 +197,10 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
         resolve(true)
       } else {
         setTimeout(() => {
-          if (!path[count]) {
-            console.log(`Undefined path count for ${marker.id} count ${count} length ${path.length}`)
-          }
-  
           // Get dx & dy   
           const dx = (parseFloat(marker.getAttribute('data-x')) || 0) + path[count].dx
           const dy = (parseFloat(marker.getAttribute('data-y')) || 0) + path[count].dy
-    
+
           // Apply transform
           marker.style.transform = marker.style.webkitTransform = `translate(${dx}px, ${dy}px)`
     
@@ -279,6 +293,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   function makePass(event, receiver) {
     const passer = getCurrentBallHandler(parseStateFromTransition(currTransition))
 
+    // Save frame BEFORE pass
+    saveFrame()
+
     // Update state
     currTransition[passer].nextState.hasBall = false
     currTransition[receiver].nextState.hasBall = true
@@ -286,18 +303,97 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     // Update CSS
     renderPass(passer, receiver)
 
-    // Update passing candidates (previous )
+    // Update passing candidates (receiver no longer candidate, passer is)
     removePassCandidate(playersOnDOM[receiver])
     makePassCandidate(playersOnDOM[passer])
+
+    // Save frame AFTER pass
+    saveFrame() 
     event.preventDefault()
   }
 
+  function runPassAnimation(passer, receiver) {
+    const passerDOM = playersOnDOM[passer]
+    const receiverDOM = playersOnDOM[receiver]
+
+    // Parse coordinates of passer and receiver
+    const passerCoord = {
+      x: passerDOM.offsetLeft + parseFloat(passerDOM.getAttribute('data-x')),
+      y: passerDOM.offsetTop + parseFloat(passerDOM.getAttribute('data-y'))
+    }
+    const receiverCoord = {
+      x: receiverDOM.offsetLeft + parseFloat(receiverDOM.getAttribute('data-x')),
+      y: receiverDOM.offsetTop + parseFloat(receiverDOM.getAttribute('data-y'))
+    }
+
+    return new Promise((resolve, reject) => {
+      // Generate "ball" at passer coordinate
+      const ball = document.createElement('div')
+      ball.classList.add('ball')
+
+      // Generate path
+      const path = []
+      const total_dx = receiverCoord.x - passerCoord.x
+      const total_dy = receiverCoord.y - passerCoord.y
+      const dx = total_dx / PASS_PATH_LENGTH
+      const dy = total_dy / PASS_PATH_LENGTH
+      for (let i = 0; i < PASS_PATH_LENGTH; ++i)
+        path.push({ x: dx, y: dy })
+  
+      // Set offsets and data-attrs
+      ball.setAttribute('style', `left: ${passerCoord.x}px; top: ${passerCoord.y}px`)
+      ball.setAttribute('data-x', 0)
+      ball.setAttribute('data-y', 0)
+      court.appendChild(ball)
+
+      // Animate pass
+      animatePassBall(ball, path).then((val) => {
+        // Remove ball from court
+        court.removeChild(ball)
+
+        // Update passer CSS representation
+        renderPass(passer, receiver)
+
+        // Signal parent
+        resolve(true)
+      })
+    })
+  }
+
+  function animatePassBall(ball, path, count = 0) {
+    return new Promise((resolve, reject) => {
+      if (count == PASS_PATH_LENGTH) {
+        resolve(true)
+      } else {
+        setTimeout(() => {
+          // Get dx & dy
+          const dx = (parseFloat(ball.getAttribute('data-x')) || 0) + path[count].x
+          const dy = (parseFloat(ball.getAttribute('data-y')) || 0) + path[count].y
+
+          // Apply transform
+          ball.style.transform = ball.style.webkitTransform = `translate(${dx}px, ${dy}px)`
+
+          // Update data-x and data-y attributes
+          ball.setAttribute('data-x', dx)
+          ball.setAttribute('data-y', dy)
+
+          // Recursive call
+          animatePassBall(ball, path, count + 1).then((val) => resolve(val))
+        }, PASS_TIMEOUT)
+      }
+    })
+  }
+
+  /**
+   * Show the pass being made by toggling the classes of the passer (#@param oldID)
+   * and the receiver (#@param newID).
+   */
   function renderPass(oldID, newID) {
     const passer = playersOnDOM[oldID]
     const receiver = playersOnDOM[newID]
 
-    passer.classList.remove('ball')
-    receiver.classList.add('ball')
+    passer.classList.remove(BALL_ID)
+    receiver.classList.add(BALL_ID)
   }
 
   function init() {
@@ -313,8 +409,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * DOM links
    */
   // Buttons
-  btnReplay.disabled = true
   btnSave.addEventListener('click', saveFrame)
+  btnReplay.disabled = true
   btnReplay.addEventListener('click', replay)
 
   // Pens

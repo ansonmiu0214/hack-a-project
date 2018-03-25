@@ -30,10 +30,15 @@ let playData = {
 }
 
 // Constants and flags
-const FRAME_MILLIS = 700
-const MARKER_DIAMETER = 40
-const SMOOTHNESS = 2
-const COURT_ID = 'court'
+const FRAME_MILLIS      = 700
+const PASS_MILLIS       = 400
+const MARKER_DIAMETER   = 40
+const SMOOTHNESS        = 1
+const COURT_ID          = 'court'
+const PLAYER_ID         = 'player'
+const BALL_ID           = 'ballhandler'
+const PASS_PATH_LENGTH  = 40
+const PASS_TIMEOUT      = PASS_MILLIS / PASS_PATH_LENGTH
 
 // Global functions
 function renderState(state) {
@@ -51,8 +56,8 @@ function renderState(state) {
 
     // Reset class lists
     marker.className = ''
-    marker.classList.add('player')
-    if (coords.hasBall) marker.classList.add('ball')
+    marker.classList.add(PLAYER_ID)
+    if (coords.hasBall) marker.classList.add(BALL_ID)
   }
 }
 
