@@ -18,22 +18,15 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
   // Pen
   var currentPen = null;
+  var currentPenType = 0;
 
   function markerMoveHandler(event) {
     var target = event.target;
     var id = target.id;
 
-    // Old coordinates
-    var old_dx = parseFloat(target.getAttribute('data-x'));
-    var old_dy = parseFloat(target.getAttribute('data-y'));
-    var old_x = target.offsetLeft + old_dx + MARKER_DIAMETER / 2;
-    var old_y = target.offsetTop + old_dy + MARKER_DIAMETER / 2;
-
-    // Derive new coordinates
-    var new_dx = (old_dx || 0) + event.dx;
-    var new_dy = (old_dy || 0) + event.dy;
-    var new_x = target.offsetLeft + new_dx + MARKER_DIAMETER / 2;
-    var new_y = target.offsetTop + new_dy + MARKER_DIAMETER / 2;
+    // Derive new dx & dy
+    var new_dx = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    var new_dy = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
     // Translate based on data-x and data-y attributes
     target.style.webkitTransform = target.style.transform = 'translate(' + new_dx + 'px, ' + new_dy + 'px)';
@@ -41,8 +34,6 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     // Update data attributes for stateful memory
     target.setAttribute('data-x', new_dx);
     target.setAttribute('data-y', new_dy);
-
-    console.log('final data: (' + new_dx + ', ' + new_dy + ')');
 
     // Add midpoints & endpoint (dx & dy)
     var dx = event.dx / SMOOTHNESS;
@@ -72,9 +63,21 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       y: new_y,
       hasBall: currBallHander === id
 
-      // Assign timeout and next state of moved player
+      // Assign timeout, next state and pen type of moved player
     };currTransition[id].timeout = timeout;
     currTransition[id].nextState = nextState;
+    currTransition[id].pen = currentPenType;
+  }
+
+  function hasUnsavedFrame() {
+    console.log(currTransition);
+    for (var player in currTransition) {
+      var data = currTransition[player];
+      if (data.path.length > 0) return true;
+      if (data.pen !== PenTypes.move) return true;
+    }
+
+    return false;
   }
 
   /**
@@ -84,6 +87,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   function saveFrame() {
     var event = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
+    console.log(hasUnsavedFrame());
+
     // Add transition to play data
     playData.transitions.push(currTransition);
 
@@ -92,6 +97,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
     // Reset 'current transition' to a blank slate
     currTransition = initTransition(currTransition);
+
+    console.log(hasUnsavedFrame());
 
     // Enable replay button
     btnReplay.disabled = playData.transitions.length == 0;
@@ -231,9 +238,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       if (currentPen === penPass) disablePassMode();
       if (target == penPass) enablePassMode();
 
-      currentPen.classList.remove('active');
-      target.classList.add('active');
+      currentPen.classList.remove('activePen');
+      target.classList.add('activePen');
       currentPen = target;
+      currentPenType = PenTypes[target.id];
+      console.log(currentPenType);
     }
     event.preventDefault();
   }
@@ -415,8 +424,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
   function init() {
     // Set active pen to MOVE
-    penMove.classList.add('active');
+    penMove.classList.add('activePen');
     currentPen = penMove;
+    currentPenType = PenTypes[currentPen.id];
 
     // Enable draggability for players
     disablePassMode();

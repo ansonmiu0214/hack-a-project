@@ -1,21 +1,82 @@
 <div class="card ctrl-card">
   <h5 class="card-header">Pens</h5>
   <div class="card-body">
-    <div class="list-group" id="markerCtrls">
-      <button type="button" id="move" class="list-group-item list-group-item-action">Move</button>
-      <button type="button" id="screen" class="list-group-item list-group-item-action">Screen</button>
-      <button type="button" id="pass" class="list-group-item list-group-item-action">Pass</button>
-    </div> <!-- // #markerCtrls -->
-  </div>
-</div> <!-- // .ctrl-card -->
+    <div class="row">
+      <div class="col ctrlWrapper">
+        <a class="penButton" id="move"></a>
+        Move
+      </div> <!-- // .ctrlWrapper #move -->
+      <div class="col ctrlWrapper">
+          <a class="penButton" id="screen"></a>
+        Screen
+      </div> <!-- // .ctrlWrapper #screen -->
+      <div class="col ctrlWrapper">
+        <a class="penButton" id="pass"></a>
+        Pass
+      </div> <!-- // .ctrlWrapper #pass -->
+    </div> <!-- // .row -->
+  </div> <!-- // .card-body -->
+</div> <!-- // .ctrl-card (pens) -->
 
 <div class="card ctrl-card">
+  <h5 class="card-header">Current Stage</h5>
+  <div class="card-body">
+    <!-- TODO add text area for "analysis" -->
+
+    <div class="row">
+      <div class="col ctrlWrapper">
+        <a class="stageButton" id="undoFrame"></a>
+        Undo Frame
+      </div>
+      <div class="col ctrlWrapper">
+        <a class="stageButton" id="saveFrame"></a>
+        Save Frame
+      </div>
+      <div class="col ctrlWrapper"></div>
+    </div>
+
+
+  </div> <!-- // .card-body -->
+</div> <!-- // .ctrl-card (current frame) -->
+
+<div class="card ctrl-card">
+  <h5 class="card-header">Play</h5>
+  <div class="card-body">
+    <!-- TODO add frame controls -->
+    <div class="input-group input-group-lg mb-3">
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary" type="button">Prev</button>
+      </div>
+      <input type="text" class="form-control" placeholder="Frame" aria-label="" aria-describedby="basic-addon1">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button">Next</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col ctrlWrapper">
+        <a class="playButton" id="replay"></a>
+        Replay
+      </div>
+      <div class="col ctrlWrapper">
+        <a class="playButton" id="savePlay"></a>
+        Save
+      </div>
+      <div class="col ctrlWrapper">
+        <a class="playButton" id="exportPlay"></a>
+        Export
+      </div>
+    </div>
+  </div>
+</div> <!-- // .ctrl-card (play) -->
+
+<!-- <div class="card ctrl-card">
   <h5 class="card-header">Stages</h5>
   <div class="card-body">
     <div class="list-group" id="stageCtrls">
       <button type="button" id="undoFrame" class="list-group-item list-group-item-action">Undo Frame</button>
       <button type="button" id="saveFrame" class="list-group-item list-group-item-action">Save Frame</button>
       <button type="button" id="replay" class="list-group-item list-group-item-action">Replay</button>
-    </div> <!-- // #stageCtrls -->
+    </div> 
   </div>
-</div> <!-- // .ctrl-card -->
+</div> -->

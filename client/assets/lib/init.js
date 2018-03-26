@@ -36,33 +36,33 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
    */
   function markerMoveHandler(event) {
     var target = event.target;
-    var id = target.id;
-
-    // Old coordinates
-    var old_dx = parseFloat(target.getAttribute('data-x'));
-    var old_dy = parseFloat(target.getAttribute('data-y'));
-    var old_x = target.offsetLeft + old_dx;
-    var old_y = target.offsetTop + old_dy;
 
     // Derive new coordinates
-    var new_dx = (old_dx || 0) + event.dx;
-    var new_dy = (old_dy || 0) + event.dy;
-    var new_x = target.offsetLeft + new_dx;
-    var new_y = target.offsetTop + new_dy;
+    var dx = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    var dy = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
     // Translate based on data-x and data-y attributes
-    target.style.webkitTransform = target.style.transform = 'translate(' + new_dx + 'px, ' + new_dy + 'px)';
+    target.style.webkitTransform = target.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
 
     // Update data attributes for stateful memory
-    target.setAttribute('data-x', new_dx);
-    target.setAttribute('data-y', new_dy);
-
-    // Update start state for player
-    startState[id].x = new_x;
-    startState[id].y = new_y;
+    target.setAttribute('data-x', dx);
+    target.setAttribute('data-y', dy);
   }
 
-  function markerEndHandler(event) {}
+  function markerEndHandler(event) {
+    var target = event.target;
+    var id = target.id;
+
+    // Compute coordinates
+    var dx = parseFloat(target.getAttribute('data-x'));
+    var dy = parseFloat(target.getAttribute('data-y'));
+    var x = target.offsetLeft + dx;
+    var y = target.offsetTop + dy;
+
+    // Update start state for player
+    startState[id].x = x;
+    startState[id].y = y;
+  }
 
   function resetDefaultState(event) {
     renderState(defaultConfig);

@@ -2,24 +2,33 @@
 
 var app = angular.module('playmaker', ['ui.router']);
 
-// DOM elements
+/**
+ * DOM elements
+ */
 var court = document.getElementById('court');
 
-// Data initialisations
+/**
+ * Data initialisations
+ */
+
 var playersOnDOM = {};
+
 var defaultConfig = Object.freeze({
-  pg: { x: 330, y: 380, hasBall: true },
-  sg: { x: 100, y: 280, hasBall: false },
-  sf: { x: 560, y: 280, hasBall: false },
-  pf: { x: 230, y: 200, hasBall: false },
+  pg: { x: 330, y: 400, hasBall: true },
+  sg: { x: 100, y: 300, hasBall: false },
+  sf: { x: 560, y: 300, hasBall: false },
+  pf: { x: 250, y: 200, hasBall: false },
   c: { x: 400, y: 100, hasBall: false }
 });
+
+var PenTypes = Object.freeze({ 'move': 0, 'screen': 1, 'pass': 2 });
+
 var newTransition = Object.freeze({
-  pg: { path: [], timeout: 0, nextState: {} },
-  sg: { path: [], timeout: 0, nextState: {} },
-  sf: { path: [], timeout: 0, nextState: {} },
-  pf: { path: [], timeout: 0, nextState: {} },
-  c: { path: [], timeout: 0, nextState: {} }
+  pg: { path: [], pen: 0, timeout: 0, nextState: {} },
+  sg: { path: [], pen: 0, timeout: 0, nextState: {} },
+  sf: { path: [], pen: 0, timeout: 0, nextState: {} },
+  pf: { path: [], pen: 0, timeout: 0, nextState: {} },
+  c: { path: [], pen: 0, timeout: 0, nextState: {} }
 });
 
 var startState = JSON.parse(JSON.stringify(defaultConfig));
@@ -45,7 +54,6 @@ var PASS_TIMEOUT = PASS_MILLIS / PASS_PATH_LENGTH;
 function renderState(state) {
   for (var player in playersOnDOM) {
     var marker = playersOnDOM[player];
-    // const coords = defaultConfig[player]
     var coords = state[player];
 
     // Reset coordinates and data attributes
@@ -63,6 +71,9 @@ function renderState(state) {
   }
 }
 
+/**
+ * Returns the ID of the ball handler in the @param state.
+ */
 function getCurrentBallHandler(state) {
   for (var player in state) {
     if (state[player].hasBall) return player;

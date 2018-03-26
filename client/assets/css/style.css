@@ -55,7 +55,7 @@
   user-select         : none;
 }
 
-.player {
+.player, .penButton, .stageButton, .playButton {
   background-image: radial-gradient(var(--marker-bg-color) 0%, var(--marker-bg-color) 30%, black 100%);
 }
 
@@ -73,6 +73,7 @@
 
 #ctrls {
   flex: 1;
+  /* height: 100vh; */
 }
 
 .ctrl-card {
@@ -85,7 +86,21 @@ a {
 }
 
 /* Use hover property to show passing option */
+.penButton:hover, 
+.stageButton:hover,
+.playButton:hover,
+.activePen, 
 .passCandidate:hover > div {
-  background-color: var(--ballhandler-bg-color);
+  background-image: radial-gradient(var(--ballhandler-bg-color) 0%, var(--ballhandler-bg-color) 30%, black 100%);
   color: var(--ballhandler-txt-color);
+}
+
+.ctrlWrapper {
+  text-align: center;
+}
+
+.penButton, .stageButton, .playButton {
+  display: block;
+  padding-top: 100%;
+  border-radius: 50%;
 }
