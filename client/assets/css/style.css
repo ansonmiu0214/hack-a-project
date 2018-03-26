@@ -73,7 +73,7 @@
 
 #ctrls {
   flex: 1;
-  /* height: 100vh; */
+  height: 100vh;
 }
 
 .ctrl-card {
@@ -83,6 +83,12 @@
 
 a {
   cursor: pointer;
+}
+
+.stageButton, .playButton {
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
 }
 
 /* Use hover property to show passing option */
@@ -102,5 +108,32 @@ a {
 .penButton, .stageButton, .playButton {
   display: block;
   padding-top: 100%;
+}
+
+.penButton {
   border-radius: 50%;
 }
+
+#undoFrame {
+  background-image: url('/assets/media/undo.png');
+}
+
+#saveFrame {
+  background-image: url('/assets/media/add.png');
+}
+
+#replay {
+  background-image: url('/assets/media/replay.png');
+}
+
+#savePlay {
+  background-image: url('/assets/media/save.png');
+}
+
+#exportPlay {
+  background-image: url('/assets/media/export.png');
+}
+
+ #frameIndicator {
+   text-align: center;
+ }

@@ -1,19 +1,35 @@
 const app = angular.module('playmaker')
 app.controller('DevController', ['$scope', '$http', '$location', '$state', ($scope, $http, $location, $state) => {
   console.log('DevController loaded!')
+  $scope.hasUnsavedChanges = false
+  $scope.currFrame = 1
+  $scope.totalFrames = 1
 
   /**
    * Setup
    */
-  // DOM elements
-  const btnUndo = document.getElementById('undoFrame')
-  const btnSave = document.getElementById('saveFrame')
-  const btnReplay = document.getElementById('replay')
+  
+  // DOM - pens
   const penMove = document.getElementById('move')
   const penScreen = document.getElementById('screen')
   const penPass = document.getElementById('pass')
   const pens = [penMove, penScreen, penPass]
 
+  // DOM - current frame
+  const currStageNumber = document.getElementById('currStageNumber')
+  const stageUnsaved = document.getElementById('stageUnsaved')
+  const stageAnalysis = document.getElementById('stageAnalysis')
+  const btnUndo = document.getElementById('undoFrame')
+  const btnSave = document.getElementById('saveFrame')
+
+  // DOM - play controls
+  const btnPrevFrame = document.getElementById('btnPrevFrame')
+  const frameIndicator = document.getElementById('frameIndicator')
+  const btnNextFrame = document.getElementById('btnNextFrame')
+  const btnReplay = document.getElementById('replay')
+  const btnSavePlay = document.getElementById('savePlay')
+  const btnExportPlay = document.getElementById('exportPlay')
+  
   // Pen
   let currentPen = null
   let currentPenType = 0
@@ -51,8 +67,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     const timeout = FRAME_MILLIS / currTransition[id].path.length
 
     // Derive new coordinates
-    const new_x = target.offsetLeft + parseFloat(target.getAttribute('data-x')) + (MARKER_DIAMETER / 2)
-    const new_y = target.offsetTop + parseFloat(target.getAttribute('data-y')) + (MARKER_DIAMETER / 2) 
+    const new_x = target.offsetLeft + parseFloat(target.getAttribute('data-x'))
+    const new_y = target.offsetTop + parseFloat(target.getAttribute('data-y'))
 
     // Formulate a new state for the player that moved
     const nextState = {
@@ -65,10 +81,29 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     currTransition[id].timeout = timeout
     currTransition[id].nextState = nextState
     currTransition[id].pen = currentPenType
+
+    generateAnalysis(id, lastState, nextState)
+
+    // Indicate unsaved change flag
+    if (!$scope.hasUnsavedChanges) $scope.$apply(() => $scope.hasUnsavedChanges = true)
+  }
+  
+  function generateAnalysis(playerID, prevState, currState) {
+    const handler = getCurrentBallHandler(prevState)
+    const displayID = playerID.toUpperCase()
+    switch (currentPenType) {
+      case PenTypes.move:
+        stageAnalysis.value += `${displayID} ${handler === playerID ? "dribbled" : "moved"}. `
+        break;
+      case PenTypes.screen:
+        stageAnalysis.value += `${displayID} set screen. `
+        break;
+      case PenTypes.pass:
+        break;
+    }
   }
 
   function hasUnsavedFrame() {
-    console.log(currTransition)
     for (let player in currTransition) {
       const data = currTransition[player]
       if (data.path.length > 0) return true
@@ -83,10 +118,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * currTransition into a blank slate.
    */
   function saveFrame(event = null) {
-    console.log(hasUnsavedFrame())
-
     // Add transition to play data
     playData.transitions.push(currTransition)
+
+    // Add analysis to play data
+    playData.analysis.push(stageAnalysis.value)
 
     // Update last-updated state from this saved transition
     lastState = parseStateFromTransition(currTransition)
@@ -94,10 +130,21 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     // Reset 'current transition' to a blank slate
     currTransition = initTransition(currTransition)
 
-    console.log(hasUnsavedFrame())
-
     // Enable replay button
     btnReplay.disabled = playData.transitions.length == 0
+    $scope.$apply(() => {
+      $scope.totalFrames++
+      $scope.currFrame++
+      $scope.hasUnsavedChanges = false
+    })
+    
+    stageAnalysis.value = ""
+  }
+
+  function initTansitionFromState(state) {
+    const transition = JSON.parse(JSON.stringify(newTransition))
+    for (let player in state) transition[player].nextState = state[player]
+    return transition
   }
 
   /**
@@ -148,10 +195,10 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    * transition is synchronous (but player movements within a specific
    * transition are ran asynchronously).
    */
-  function replayFrames(prevState, transitions, maxCount, count = 0) {
+  function replayFrames(prevState, transitions, maxCount, count = 0, isForward = true) {
     return new Promise((resolve, reject) => {
       // Base case: no more frames to replay
-      if (count == maxCount) {
+      if (count === maxCount) {
         resolve(true)
       } else {
         // Initialise array of MovePlayer promises
@@ -172,11 +219,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
           if (prevHandler !== currHandler) {
             runPassAnimation(prevHandler, currHandler).then((res) => {
-              replayFrames(currState, transitions, maxCount, count + 1)
+              replayFrames(currState, transitions, maxCount, count + 1, isForward)
                 .then((val) => resolve(val))
             })
           } else {
-            replayFrames(currState, transitions, maxCount, count + 1)
+            replayFrames(currState, transitions, maxCount, count + 1, isForward)
               .then((val) => resolve(val))
           }
         })
@@ -199,7 +246,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       const path = data.path
       const path_length = path.length
 
-      if (path_length == 0 || count == path_length) {
+      if (path_length === 0 || count === path_length) {
         // Resolve on base cases
         resolve(true)
       } else {
@@ -303,7 +350,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     const passer = getCurrentBallHandler(parseStateFromTransition(currTransition))
 
     // Save frame BEFORE pass
-    saveFrame()
+    if (hasUnsavedFrame()) saveFrame()
 
     // Update state
     currTransition[passer].nextState.hasBall = false
@@ -311,6 +358,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     // Update CSS
     renderPass(passer, receiver)
+
+    // Default caption
+    stageAnalysis.value += `${passer.toUpperCase()} passed to ${receiver.toUpperCase()}. `
 
     // Update passing candidates (receiver no longer candidate, passer is)
     removePassCandidate(playersOnDOM[receiver])
@@ -405,6 +455,53 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     receiver.classList.add(BALL_ID)
   }
 
+  function getTotalFrameCount() {
+    return playData.transitions.length + 1
+  }
+
+  function undoFrame(event) {
+    // Don't need to do anything if no changes detected
+    if (!hasUnsavedFrame()) return
+
+    currTransition = initTansitionFromState(lastState)
+    renderState(lastState)
+
+    $scope.$apply(() => $scope.hasUnsavedChanges = false)
+  }
+
+  function goToPrevFrame(event) {
+    // Update scope variable
+    $scope.$apply(() => $scope.currFrame--)
+
+    // Refresh analysis
+    stageAnalysis.value = playData.analysis[$scope.currFrame - 1]
+
+    // Render state
+    if ($scope.currFrame === 1) renderState(startState)
+    else renderState(parseStateFromTransition(playData.transitions[$scope.currFrame - 2]))
+  }
+
+  function goToNextFrame(event) {
+    // Disable button to prevent concurrent animations
+    btnNextFrame.disabled = true
+
+    // Show animation
+    const currState = $scope.currFrame === 1 ? startState : parseStateFromTransition(playData.transitions[$scope.currFrame - 2])
+
+    replayFrames(currState, playData.transitions, $scope.currFrame, $scope.currFrame - 1)
+      .then((val) => {
+        // Update scope frame number
+        $scope.$apply(() => $scope.currFrame++)
+
+        // Refresh analysis
+        const nextAnalysis = playData.analysis[$scope.currFrame - 1]
+        stageAnalysis.value = nextAnalysis ? nextAnalysis : ''
+
+        // Re-enable button
+        if ($scope.currFrame < $scope.totalFrames) btnNextFrame.disabled = false
+      })
+  }
+
   function init() {
     // Set active pen to MOVE
     penMove.classList.add('activePen')
@@ -413,20 +510,22 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     // Enable draggability for players
     disablePassMode()
+
+    /**
+     * DOM links
+     */
+    // Pens
+    pens.forEach((pen, index) => pen.addEventListener('click', applyNewPen))
+
+    // Current frame control
+    btnUndo.addEventListener('click', undoFrame)
+    btnSave.addEventListener('click', saveFrame)
+
+    // Overall play control
+    btnPrevFrame.addEventListener('click', goToPrevFrame)
+    btnNextFrame.addEventListener('click', goToNextFrame)
+    btnReplay.addEventListener('click', replay)
   }
-
-  /**
-   * DOM links
-   */
-  // Buttons
-  btnSave.addEventListener('click', saveFrame)
-  btnReplay.disabled = true
-  btnReplay.addEventListener('click', replay)
-
-  // Pens
-  penMove.addEventListener('click', applyNewPen)
-  penScreen.addEventListener('click', applyNewPen)
-  penPass.addEventListener('click', applyNewPen)
 
   init()
 }])
