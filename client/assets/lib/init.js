@@ -137,6 +137,17 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
       divBallHandler.appendChild(formCheck);
     }
 
+    var zoneArray = ['2-1-2', '1-3-1', '4-out'];
+    zoneArray.forEach(function (elem, index) {
+      var zoneOption = document.createElement('div');
+      zoneOption.className = 'form-check';
+
+      zoneOption.innerHTML = '<input class="form-check-input zoneRadio"\n      type="radio" name="zoneRadio" id="radio_' + elem + '" \n      value="' + elem + '">';
+      zoneOption.innerHTML += '<label class="form-check-label" \n      for="radio_' + elem + '">' + elem + '</label>';
+
+      document.getElementById('zoneSetup').appendChild(zoneOption);
+    });
+
     // Add onclick callback for all ball handler radio inputs
     document.querySelectorAll('.ballHandlerRadio').forEach(function (radio, index) {
       return radio.addEventListener('change', changedInitBallHandler);

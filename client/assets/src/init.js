@@ -139,6 +139,20 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
       divBallHandler.appendChild(formCheck) 
     }
 
+    const zoneArray = ['2-1-2', '1-3-1', '4-out']
+    zoneArray.forEach((elem, index) => {
+      const zoneOption = document.createElement('div')
+      zoneOption.className = 'form-check'
+
+      zoneOption.innerHTML = `<input class="form-check-input zoneRadio"
+      type="radio" name="zoneRadio" id="radio_${elem}" 
+      value="${elem}">`
+      zoneOption.innerHTML += `<label class="form-check-label" 
+      for="radio_${elem}">${elem}</label>`
+
+      document.getElementById('zoneSetup').appendChild(zoneOption)
+    })
+
     // Add onclick callback for all ball handler radio inputs
     document.querySelectorAll('.ballHandlerRadio')
       .forEach((radio, index) => radio.addEventListener('change', changedInitBallHandler))

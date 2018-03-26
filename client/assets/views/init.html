@@ -1,16 +1,29 @@
 <div class="card ctrl-card" id="initCtrls">
   <h5 class="card-header">Setup</h5>
   <div class="card-body">
+    <p>
+      Drag the player markers to rearrange and set up your starting formation.
+    </p>
     <form>
       <div class="form-group" id="ballHandlers">
         <label for="ballHandlers">Ball Handler</label>
       </div> <!-- // .form-group #ballHandlers -->
+    </form> <!-- // form (ball handler) -->
 
-      <div class="btn-group d-flex" role="group" aria-label="Basic example">
-        <button class="btn btn-danger" id="resetState">Reset</button>
-        <button class="btn btn-primary" id="saveState">Save</button>
-      </div> <!-- // .btn-group -->
-    </form> <!-- // form -->
+    <p>
+      Alternatively, select one of the built-in formations below.
+    </p>
+
+    <form>
+      <div class="form-group" id="zoneSetup">
+        <label for="zoneSetup">Zone Setup</label>
+      </div>
+    </form> <!-- // form (zone) -->
+
+    <div class="btn-group d-flex" role="group" aria-label="Basic example">
+      <button class="btn btn-danger" id="resetState">Reset</button>
+      <button class="btn btn-primary" id="saveState">Save</button>
+    </div> <!-- // .btn-group -->
 
   </div> <!-- // .card-body -->
 </div> <!-- // #initCtrls -->
