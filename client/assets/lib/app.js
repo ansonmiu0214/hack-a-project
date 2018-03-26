@@ -8,11 +8,11 @@ var court = document.getElementById('court');
 // Data initialisations
 var playersOnDOM = {};
 var defaultConfig = Object.freeze({
-  pg: { x: 330, y: 550, hasBall: true },
-  sg: { x: 100, y: 450, hasBall: false },
-  sf: { x: 560, y: 450, hasBall: false },
-  pf: { x: 230, y: 380, hasBall: false },
-  c: { x: 400, y: 250, hasBall: false }
+  pg: { x: 330, y: 380, hasBall: true },
+  sg: { x: 100, y: 280, hasBall: false },
+  sf: { x: 560, y: 280, hasBall: false },
+  pf: { x: 230, y: 200, hasBall: false },
+  c: { x: 400, y: 100, hasBall: false }
 });
 var newTransition = Object.freeze({
   pg: { path: [], timeout: 0, nextState: {} },

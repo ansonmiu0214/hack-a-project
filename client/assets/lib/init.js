@@ -9,6 +9,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
    */
 
   // DOM elements
+  var divBallHandler = document.getElementById('ballHandlers');
   var btnResetState = document.getElementById('resetState');
   var btnSaveState = document.getElementById('saveState');
 
@@ -61,9 +62,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     startState[id].y = new_y;
   }
 
-  function markerEndHandler(event) {
-    console.log(startState);
-  }
+  function markerEndHandler(event) {}
 
   function resetDefaultState(event) {
     renderState(defaultConfig);
@@ -126,17 +125,21 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     // Render players
     generatePlayers();
 
+    // Populate radio button for initial ball handler
     for (var player in defaultConfig) {
       var formCheck = document.createElement('div');
       formCheck.className = 'form-check';
+
+      // Generate input and label corresponding to player
       formCheck.innerHTML = '<input class="form-check-input ballHandlerRadio"\n        type="radio" name="ballHandlerRadio" id="radio_' + player + '" \n        value="' + player + '" ' + (player === 'pg' ? "checked" : "") + '>';
       formCheck.innerHTML += '<label class="form-check-label" \n        for="radio_' + player + '">' + player.toUpperCase() + '</label>';
 
-      document.getElementById('ballHandlers').appendChild(formCheck);
+      divBallHandler.appendChild(formCheck);
     }
 
+    // Add onclick callback for all ball handler radio inputs
     document.querySelectorAll('.ballHandlerRadio').forEach(function (radio, index) {
-      radio.addEventListener('change', changedInitBallHandler);
+      return radio.addEventListener('change', changedInitBallHandler);
     });
 
     btnResetState.addEventListener('click', resetDefaultState);
