@@ -13,7 +13,7 @@ const court = document.getElementById('court')
 const playersOnDOM = { }
 
 const defaultConfig = Object.freeze({
-  pg: { x: 330, y: 400, hasBall: true},
+  pg: { x: 330, y: 380, hasBall: true},
   sg: { x: 100, y: 300, hasBall: false},
   sf: { x: 560, y: 300, hasBall: false},
   pf: { x: 250, y: 200, hasBall: false},
@@ -36,14 +36,15 @@ let currTransition = JSON.parse(JSON.stringify(newTransition))
 
 let playData = {
   startState: startState,
-  transitions: []
+  transitions: [],
+  analysis: []
 }
 
 // Constants and flags
 const FRAME_MILLIS      = 1000
-const PASS_MILLIS       = 800
+const PASS_MILLIS       = 500
 const MARKER_DIAMETER   = 40
-const SMOOTHNESS        = 1
+const SMOOTHNESS        = 2
 const COURT_ID          = 'court'
 const PLAYER_ID         = 'player'
 const BALL_ID           = 'ballhandler'

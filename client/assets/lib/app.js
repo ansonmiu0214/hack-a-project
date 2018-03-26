@@ -14,7 +14,7 @@ var court = document.getElementById('court');
 var playersOnDOM = {};
 
 var defaultConfig = Object.freeze({
-  pg: { x: 330, y: 400, hasBall: true },
+  pg: { x: 330, y: 380, hasBall: true },
   sg: { x: 100, y: 300, hasBall: false },
   sf: { x: 560, y: 300, hasBall: false },
   pf: { x: 250, y: 200, hasBall: false },
@@ -37,13 +37,14 @@ var currTransition = JSON.parse(JSON.stringify(newTransition));
 
 var playData = {
   startState: startState,
-  transitions: []
+  transitions: [],
+  analysis: []
 
   // Constants and flags
 };var FRAME_MILLIS = 1000;
-var PASS_MILLIS = 800;
+var PASS_MILLIS = 500;
 var MARKER_DIAMETER = 40;
-var SMOOTHNESS = 1;
+var SMOOTHNESS = 2;
 var COURT_ID = 'court';
 var PLAYER_ID = 'player';
 var BALL_ID = 'ballhandler';

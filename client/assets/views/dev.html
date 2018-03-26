@@ -19,22 +19,30 @@
 </div> <!-- // .ctrl-card (pens) -->
 
 <div class="card ctrl-card">
-  <h5 class="card-header">Current Stage</h5>
+  <h5 class="card-header">
+    Current Stage 
+    <span ng-if="hasUnsavedChanges" class="badge badge-danger" id="stageUnsaved">unsaved</span></h5>
   <div class="card-body">
-    <!-- TODO add text area for "analysis" -->
+    <form>
+      <div class="form-group">
+        <textarea ng-disabled="currFrame !== totalFrames" class="form-control" id="stageAnalysis" placeholder="Analysis" rows="3"></textarea>
+      </div>
+    </form>
 
-    <div class="row">
+    <div ng-show="currFrame === totalFrames" class="row">
       <div class="col ctrlWrapper">
-        <a class="stageButton" id="undoFrame"></a>
-        Undo Frame
+        <a class="stageButton" id="undoFrame"></a>Undo Frame
       </div>
       <div class="col ctrlWrapper">
-        <a class="stageButton" id="saveFrame"></a>
-        Save Frame
+        <a class="stageButton" id="saveFrame"></a>Save Frame
       </div>
       <div class="col ctrlWrapper"></div>
     </div>
 
+    <div ng-show="currFrame !== totalFrames" class="alert alert-danger" role="alert">
+      <h4 class="alert-heading">Cannot edit previous frame!</h4>
+      <p>Unfortunately, editing previous frames is not a supported feature in this release.</p>
+    </div>
 
   </div> <!-- // .card-body -->
 </div> <!-- // .ctrl-card (current frame) -->
@@ -42,32 +50,39 @@
 <div class="card ctrl-card">
   <h5 class="card-header">Play</h5>
   <div class="card-body">
-    <!-- TODO add frame controls -->
-    <div class="input-group input-group-lg mb-3">
-      <div class="input-group-prepend">
-        <button class="btn btn-outline-secondary" type="button">Prev</button>
-      </div>
-      <input type="text" class="form-control" placeholder="Frame" aria-label="" aria-describedby="basic-addon1">
-      <div class="input-group-append">
-        <button class="btn btn-outline-secondary" type="button">Next</button>
+    <div ng-show="hasUnsavedChanges" class="alert alert-warning" role="alert">
+      <h4 class="alert-heading">Unsaved Frame</h4>
+      <p>Play management only enabled when your current frame is saved.</p>
+      <hr>
+      <p class="mb-0">Tip: you can discard your current change by pressing "Undo Frame".</p>
+    </div> <!-- // ng-if (edit mode) -->
+
+    <div ng-show="!hasUnsavedChanges">
+      <div class="input-group input-group-lg mb-3">
+        <div class="input-group-prepend">
+          <button class="btn btn-outline-secondary" type="button" id="btnPrevFrame" ng-disabled="currFrame === 1"><i class="fas fa-backward"></i></button>
+        </div> <!-- // input-group-prepend (prev frame) -->
+        <input type="text" class="form-control" id="frameIndicator" value="{{currFrame}} of {{totalFrames}}" disabled>
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="button" id="btnNextFrame" ng-disabled="currFrame === totalFrames"><i class="fas fa-forward"></i></button>
+        </div> <!-- // .input-group-append (next frame) -->
+      </div> <!-- // .input-group (frame controls) -->
+    
+      <div class="row">
+        <div class="col ctrlWrapper">
+          <a class="playButton" id="replay"></a>Replay
+        </div>
+        <div class="col ctrlWrapper">
+          <a class="playButton" id="savePlay"></a>Save
+        </div>
+        <div class="col ctrlWrapper">
+          <a class="playButton" id="exportPlay"></a>Export
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col ctrlWrapper">
-        <a class="playButton" id="replay"></a>
-        Replay
-      </div>
-      <div class="col ctrlWrapper">
-        <a class="playButton" id="savePlay"></a>
-        Save
-      </div>
-      <div class="col ctrlWrapper">
-        <a class="playButton" id="exportPlay"></a>
-        Export
-      </div>
-    </div>
-  </div>
+  </div> <!-- // ng-if (replay mode) -->
+    
 </div> <!-- // .ctrl-card (play) -->
 
 <!-- <div class="card ctrl-card">
