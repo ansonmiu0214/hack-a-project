@@ -7,6 +7,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
    */
   
   // DOM elements
+  const divBallHandler = document.getElementById('ballHandlers')
   const btnResetState = document.getElementById('resetState')
   const btnSaveState = document.getElementById('saveState')
 
@@ -38,14 +39,14 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     // Old coordinates
     const old_dx = parseFloat(target.getAttribute('data-x'))
     const old_dy = parseFloat(target.getAttribute('data-y'))
-    const old_x = target.offsetLeft + old_dx + (MARKER_DIAMETER / 2)
-    const old_y = target.offsetTop + old_dy + (MARKER_DIAMETER / 2)
+    const old_x = target.offsetLeft + old_dx
+    const old_y = target.offsetTop + old_dy
 
     // Derive new coordinates
     const new_dx = (old_dx || 0) + event.dx
     const new_dy = (old_dy || 0) + event.dy
-    const new_x = target.offsetLeft + new_dx + (MARKER_DIAMETER / 2)
-    const new_y = target.offsetTop + new_dy + (MARKER_DIAMETER / 2) 
+    const new_x = target.offsetLeft + new_dx
+    const new_y = target.offsetTop + new_dy
 
     // Translate based on data-x and data-y attributes
     target.style.webkitTransform = target.style.transform = `translate(${new_dx}px, ${new_dy}px)`
@@ -60,7 +61,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   }
 
   function markerEndHandler(event) {
-    console.log(startState)
+
   }
 
   function resetDefaultState(event) {
@@ -125,30 +126,25 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     // Render players
     generatePlayers()
 
-    // Initialise setup form controls
-    // for (let player in defaultConfig) {
-    //   const opt = document.createElement('option')
-    //   opt.innerHTML = player.toUpperCase()
-    //   initBallHandler.appendChild(opt)
-    // }
-
+    // Populate radio button for initial ball handler
     for (let player in defaultConfig) {
       const formCheck = document.createElement('div')
       formCheck.className = 'form-check'
+
+      // Generate input and label corresponding to player
       formCheck.innerHTML = `<input class="form-check-input ballHandlerRadio"
         type="radio" name="ballHandlerRadio" id="radio_${player}" 
         value="${player}" ${player === 'pg' ? "checked" : ""}>`
       formCheck.innerHTML += `<label class="form-check-label" 
         for="radio_${player}">${player.toUpperCase()}</label>`
       
-      document.getElementById('ballHandlers').appendChild(formCheck) 
+      divBallHandler.appendChild(formCheck) 
     }
 
-    document.querySelectorAll('.ballHandlerRadio').forEach((radio, index) => {
-      radio.addEventListener('change', changedInitBallHandler)      
-    })
+    // Add onclick callback for all ball handler radio inputs
+    document.querySelectorAll('.ballHandlerRadio')
+      .forEach((radio, index) => radio.addEventListener('change', changedInitBallHandler))
 
-    // initBallHandler.addEventListener('change', changedInitBallHandler)
     btnResetState.addEventListener('click', resetDefaultState)
     btnSaveState.addEventListener('click', saveDefaultState)
   }

@@ -40,14 +40,14 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     // Old coordinates
     var old_dx = parseFloat(target.getAttribute('data-x'));
     var old_dy = parseFloat(target.getAttribute('data-y'));
-    var old_x = target.offsetLeft + old_dx + MARKER_DIAMETER / 2;
-    var old_y = target.offsetTop + old_dy + MARKER_DIAMETER / 2;
+    var old_x = target.offsetLeft + old_dx;
+    var old_y = target.offsetTop + old_dy;
 
     // Derive new coordinates
     var new_dx = (old_dx || 0) + event.dx;
     var new_dy = (old_dy || 0) + event.dy;
-    var new_x = target.offsetLeft + new_dx + MARKER_DIAMETER / 2;
-    var new_y = target.offsetTop + new_dy + MARKER_DIAMETER / 2;
+    var new_x = target.offsetLeft + new_dx;
+    var new_y = target.offsetTop + new_dy;
 
     // Translate based on data-x and data-y attributes
     target.style.webkitTransform = target.style.transform = 'translate(' + new_dx + 'px, ' + new_dy + 'px)';
@@ -126,13 +126,6 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     // Render players
     generatePlayers();
 
-    // Initialise setup form controls
-    // for (let player in defaultConfig) {
-    //   const opt = document.createElement('option')
-    //   opt.innerHTML = player.toUpperCase()
-    //   initBallHandler.appendChild(opt)
-    // }
-
     for (var player in defaultConfig) {
       var formCheck = document.createElement('div');
       formCheck.className = 'form-check';
@@ -146,7 +139,6 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
       radio.addEventListener('change', changedInitBallHandler);
     });
 
-    // initBallHandler.addEventListener('change', changedInitBallHandler)
     btnResetState.addEventListener('click', resetDefaultState);
     btnSaveState.addEventListener('click', saveDefaultState);
   }

@@ -26,14 +26,14 @@ let currTransition = JSON.parse(JSON.stringify(newTransition))
 
 let playData = {
   startState: startState,
-  transitions: [],
+  transitions: []
 }
 
 // Constants and flags
 const FRAME_MILLIS      = 1000
 const PASS_MILLIS       = 800
 const MARKER_DIAMETER   = 40
-const SMOOTHNESS        = 2
+const SMOOTHNESS        = 1
 const COURT_ID          = 'court'
 const PLAYER_ID         = 'player'
 const BALL_ID           = 'ballhandler'
@@ -44,7 +44,8 @@ const PASS_TIMEOUT      = PASS_MILLIS / PASS_PATH_LENGTH
 function renderState(state) {
   for (let player in playersOnDOM) {
     const marker = playersOnDOM[player]
-    const coords = defaultConfig[player]
+    // const coords = defaultConfig[player]
+    const coords = state[player]
 
     // Reset coordinates and data attributes
     marker.setAttribute('style', `left: ${coords.x}px; top: ${coords.y}px;`)

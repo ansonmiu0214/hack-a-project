@@ -31,21 +31,22 @@ var playData = {
   transitions: []
 
   // Constants and flags
-};var FRAME_MILLIS = 1500;
-var PASS_MILLIS = 1200;
+};var FRAME_MILLIS = 1000;
+var PASS_MILLIS = 800;
 var MARKER_DIAMETER = 40;
-var SMOOTHNESS = 2;
+var SMOOTHNESS = 1;
 var COURT_ID = 'court';
 var PLAYER_ID = 'player';
 var BALL_ID = 'ballhandler';
-var PASS_PATH_LENGTH = 100;
+var PASS_PATH_LENGTH = 50;
 var PASS_TIMEOUT = PASS_MILLIS / PASS_PATH_LENGTH;
 
 // Global functions
 function renderState(state) {
   for (var player in playersOnDOM) {
     var marker = playersOnDOM[player];
-    var coords = defaultConfig[player];
+    // const coords = defaultConfig[player]
+    var coords = state[player];
 
     // Reset coordinates and data attributes
     marker.setAttribute('style', 'left: ' + coords.x + 'px; top: ' + coords.y + 'px;');
