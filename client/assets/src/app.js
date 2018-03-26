@@ -9,6 +9,19 @@ const court = document.getElementById('court')
  * Data initialisations
  */
 
+// Court zones
+const leftWing    = { x: 200, y: 200, name: 'left wing' }
+const leftBlock   = { x: 350, y: 200, name: 'left block' }
+const rightBlock  = { x: 500, y: 200, name: 'right block' }
+const rightWing   = { x: 650, y: 200, name: 'right wing' }
+const leftElbow   = { x: 300, y: 380, name: 'left elbow' }
+const topOfKey    = { x: 400, y: 380, name: 'top of the key' }
+const rightElbow  = { x: 650, y: 380, name: 'right elbow' }
+const midCourt    = { x: 650, y: 530, name: 'mid-cour' }
+const backCourt   = { x: 650, y: 1130, name: 'back-court'}
+
+const zones = [leftWing, leftBlock, rightBlock, rightWing, 
+               leftElbow, topOfKey, rightElbow, midCourt, backCourt]
 
 const playersOnDOM = { }
 
@@ -79,6 +92,14 @@ function getCurrentBallHandler(state) {
   for (let player in state) 
     if (state[player].hasBall) return player
   
+  return null
+}
+
+function getZone(coord) {
+  console.log(coord)
+  const x = coord.x
+  const y = coord.y
+  for (let zone of zones) if (x < zone.x && y < zone.y) return zone.name
   return null
 }
 

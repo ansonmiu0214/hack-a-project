@@ -71,7 +71,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     const new_y = target.offsetTop + parseFloat(target.getAttribute('data-y'))
 
     // Formulate a new state for the player that moved
-    const nextState = {
+    const nextStateCoord = {
       x: new_x, 
       y: new_y, 
       hasBall: currBallHander === id
@@ -79,24 +79,27 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     // Assign timeout, next state and pen type of moved player
     currTransition[id].timeout = timeout
-    currTransition[id].nextState = nextState
+    currTransition[id].nextState = nextStateCoord
     currTransition[id].pen = currentPenType
 
-    generateAnalysis(id, lastState, nextState)
+    generateAnalysis(id, lastState, nextStateCoord)
 
     // Indicate unsaved change flag
     if (!$scope.hasUnsavedChanges) $scope.$apply(() => $scope.hasUnsavedChanges = true)
   }
   
-  function generateAnalysis(playerID, prevState, currState) {
+  function generateAnalysis(playerID, prevState, currCoord) {
     const handler = getCurrentBallHandler(prevState)
     const displayID = playerID.toUpperCase()
+
+    // Get current location
+    const currLocation = getZone(currCoord)
     switch (currentPenType) {
       case PenTypes.move:
-        stageAnalysis.value += `${displayID} ${handler === playerID ? "dribbled" : "moved"}. `
+        stageAnalysis.value += `${displayID} ${handler === playerID ? "dribbles" : "moves"} to the ${currLocation}. `
         break;
       case PenTypes.screen:
-        stageAnalysis.value += `${displayID} set screen. `
+        stageAnalysis.value += `${displayID} sets screen in the ${currLocation}. `
         break;
       case PenTypes.pass:
         break;
@@ -141,7 +144,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     stageAnalysis.value = ""
   }
 
-  function initTansitionFromState(state) {
+  function initTransitionFromState(state) {
     const transition = JSON.parse(JSON.stringify(newTransition))
     for (let player in state) transition[player].nextState = state[player]
     return transition
@@ -359,8 +362,10 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     // Update CSS
     renderPass(passer, receiver)
 
+    const receiverLocation = getZone(currTransition[receiver].nextState)
+
     // Default caption
-    stageAnalysis.value += `${passer.toUpperCase()} passed to ${receiver.toUpperCase()}. `
+    stageAnalysis.value += `${passer.toUpperCase()} passes to ${receiver.toUpperCase()} in the ${receiverLocation}. `
 
     // Update passing candidates (receiver no longer candidate, passer is)
     removePassCandidate(playersOnDOM[receiver])
@@ -463,8 +468,14 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     // Don't need to do anything if no changes detected
     if (!hasUnsavedFrame()) return
 
-    currTransition = initTansitionFromState(lastState)
+    // Revert current transition variable
+    currTransition = initTransitionFromState(lastState)
+
+    // Render previous state
     renderState(lastState)
+
+    // Reset analysis text area
+    stageAnalysis.value = ''
 
     $scope.$apply(() => $scope.hasUnsavedChanges = false)
   }
