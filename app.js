@@ -18,8 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 /**
  * Endpoints.
  */
-
-// Get a JS object of initial zone formations
+// Returns the object representing the initial built-in formations
 app.get('/api/zones', (req, res) => {
   const zones = { }
 
@@ -35,7 +34,7 @@ app.get('/api/zones', (req, res) => {
   res.send(zones)
 })
 
-// Get JSON of play
+// Returns the object from the JSON play identified by ID
 app.get('/api/play', (req, res) => {
   // Parse hash 
   const hash = req.query.id
@@ -67,10 +66,12 @@ app.delete('/api/play', (req, res) => {
     return
   }
 
+  // Remove file from directory and return success code
   fs.unlinkSync(path)
   res.sendStatus(200)
 })
 
+// Returns an array of plays stored on the server
 app.get('/api/plays', (req, res) => {
   const plays = []
 

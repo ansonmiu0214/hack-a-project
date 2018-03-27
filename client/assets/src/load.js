@@ -9,6 +9,7 @@ app.controller('LoadController', ['$scope', '$http', '$location', '$state', ($sc
    */
   const backBtn = document.getElementById('backBtn')
 
+  // Wrapper for GET request
   function getPlays() {
     // Get plays from back-end
     $http.get('/api/plays').then((res) => {    
