@@ -211,14 +211,14 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     var isForward = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
     return new Promise(function (resolve, reject) {
-      $scope.$apply(function () {
-        return $scope.currFrame++;
-      });
-
       // Base case: no more frames to replay
       if (count === maxCount) {
         resolve(true);
       } else {
+        $scope.$apply(function () {
+          return $scope.currFrame++;
+        });
+
         // Update analysis
         stageAnalysis.value = playData.analysis[count];
 
@@ -422,33 +422,31 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       var ball = document.createElement('div');
       ball.classList.add('ball');
 
-      setTimeout(function () {
-        // Generate path
-        var path = [];
-        var total_dx = receiverCoord.x - passerCoord.x;
-        var total_dy = receiverCoord.y - passerCoord.y;
-        var dx = total_dx / PASS_PATH_LENGTH;
-        var dy = total_dy / PASS_PATH_LENGTH;
-        for (var i = 0; i < PASS_PATH_LENGTH; ++i) {
-          path.push({ x: dx, y: dy });
-        } // Set offsets and data-attrs
-        ball.setAttribute('style', 'left: ' + passerCoord.x + 'px; top: ' + passerCoord.y + 'px');
-        ball.setAttribute('data-x', 0);
-        ball.setAttribute('data-y', 0);
-        court.appendChild(ball);
+      // Generate path
+      var path = [];
+      var total_dx = receiverCoord.x - passerCoord.x;
+      var total_dy = receiverCoord.y - passerCoord.y;
+      var dx = total_dx / PASS_PATH_LENGTH;
+      var dy = total_dy / PASS_PATH_LENGTH;
+      for (var i = 0; i < PASS_PATH_LENGTH; ++i) {
+        path.push({ x: dx, y: dy });
+      } // Set offsets and data-attrs
+      ball.setAttribute('style', 'left: ' + passerCoord.x + 'px; top: ' + passerCoord.y + 'px');
+      ball.setAttribute('data-x', 0);
+      ball.setAttribute('data-y', 0);
+      court.appendChild(ball);
 
-        // Animate pass
-        animatePassBall(ball, path).then(function (val) {
-          // Remove ball from court
-          court.removeChild(ball);
+      // Animate pass
+      animatePassBall(ball, path).then(function (val) {
+        // Remove ball from court
+        court.removeChild(ball);
 
-          // Update passer CSS representation
-          renderPass(passer, receiver);
+        // Update passer CSS representation
+        renderPass(passer, receiver);
 
-          // Signal parent
-          resolve(true);
-        });
-      }, 300);
+        // Signal parent
+        resolve(true);
+      });
     });
   }
 
@@ -572,6 +570,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
     // Change play data
     playData = playDataFromServer;
+    startState = playData.startState;
     if (totalFrameCount > 1) {
       var lastTransition = playDataFromServer.transitions[totalFrameCount - 2];
       currTransition = initTransition(lastTransition);

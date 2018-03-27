@@ -199,12 +199,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    */
   function replayFrames(prevState, transitions, maxCount, count = 0, isForward = true) {
     return new Promise((resolve, reject) => {
-      $scope.$apply(() => $scope.currFrame++)
-      
       // Base case: no more frames to replay
       if (count === maxCount) {
         resolve(true)
       } else { 
+        $scope.$apply(() => $scope.currFrame++)
+        
         // Update analysis
         stageAnalysis.value = playData.analysis[count]
 
@@ -544,6 +544,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     // Change play data
     playData = playDataFromServer
+    startState = playData.startState
     if (totalFrameCount > 1) {
       const lastTransition = playDataFromServer.transitions[totalFrameCount - 2]
       currTransition = initTransition(lastTransition)

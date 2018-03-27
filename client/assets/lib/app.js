@@ -45,7 +45,7 @@ var newTransition = Object.freeze({
   c: { path: [], pen: 0, timeout: 0, nextState: {} }
 });
 
-var startState = null;
+var startState = JSON.parse(JSON.stringify(defaultConfig));
 var lastState = null;
 var currTransition = JSON.parse(JSON.stringify(newTransition));
 
