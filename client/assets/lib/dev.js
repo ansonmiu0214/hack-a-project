@@ -422,31 +422,33 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       var ball = document.createElement('div');
       ball.classList.add('ball');
 
-      // Generate path
-      var path = [];
-      var total_dx = receiverCoord.x - passerCoord.x;
-      var total_dy = receiverCoord.y - passerCoord.y;
-      var dx = total_dx / PASS_PATH_LENGTH;
-      var dy = total_dy / PASS_PATH_LENGTH;
-      for (var i = 0; i < PASS_PATH_LENGTH; ++i) {
-        path.push({ x: dx, y: dy });
-      } // Set offsets and data-attrs
-      ball.setAttribute('style', 'left: ' + passerCoord.x + 'px; top: ' + passerCoord.y + 'px');
-      ball.setAttribute('data-x', 0);
-      ball.setAttribute('data-y', 0);
-      court.appendChild(ball);
+      setTimeout(function () {
+        // Generate path
+        var path = [];
+        var total_dx = receiverCoord.x - passerCoord.x;
+        var total_dy = receiverCoord.y - passerCoord.y;
+        var dx = total_dx / PASS_PATH_LENGTH;
+        var dy = total_dy / PASS_PATH_LENGTH;
+        for (var i = 0; i < PASS_PATH_LENGTH; ++i) {
+          path.push({ x: dx, y: dy });
+        } // Set offsets and data-attrs
+        ball.setAttribute('style', 'left: ' + passerCoord.x + 'px; top: ' + passerCoord.y + 'px');
+        ball.setAttribute('data-x', 0);
+        ball.setAttribute('data-y', 0);
+        court.appendChild(ball);
 
-      // Animate pass
-      animatePassBall(ball, path).then(function (val) {
-        // Remove ball from court
-        court.removeChild(ball);
+        // Animate pass
+        animatePassBall(ball, path).then(function (val) {
+          // Remove ball from court
+          court.removeChild(ball);
 
-        // Update passer CSS representation
-        renderPass(passer, receiver);
+          // Update passer CSS representation
+          renderPass(passer, receiver);
 
-        // Signal parent
-        resolve(true);
-      });
+          // Signal parent
+          resolve(true);
+        });
+      }, 300);
     });
   }
 

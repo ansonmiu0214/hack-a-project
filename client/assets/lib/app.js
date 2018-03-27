@@ -176,13 +176,3 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
 document.getElementById('homeButton').addEventListener('click', function (event) {
   return window.location = '/';
 });
-
-// document.getElementById('saveJSON').addEventListener('click', (event) => {
-//   const dataAsString = JSON.stringify(playData, null, 4)
-//   const data = `text/json;charset=utf-8,${encodeURIComponent(dataAsString)}`
-//   const dl = document.createElement('a')
-//   dl.href = `data:${data}`
-//   dl.download = 'play.json'
-//   document.body.appendChild(dl)
-//   dl.click()
-// })
