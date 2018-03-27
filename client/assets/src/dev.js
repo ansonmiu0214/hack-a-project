@@ -209,6 +209,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       if (count === maxCount) {
         resolve(true)
       } else {
+        // Update analysis
+        stageAnalysis.value = playData.analysis[count]
+
         // Initialise array of MovePlayer promises
         const playerMovements = []
 
@@ -287,8 +290,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       target.classList.add('activePen')
       currentPen = target
       currentPenType = PenTypes[target.id]
-      console.log(currentPenType)
     }
+    
     event.preventDefault()
   }
 
@@ -465,8 +468,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     receiver.classList.add(BALL_ID)
   }
 
-  function getTotalFrameCount() {
-    return playData.transitions.length + 1
+  function getTotalFrameCount(playDataObject) {
+    return playDataObject.transitions.length + 1
   }
 
   function undoFrame(event) {
@@ -518,6 +521,50 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       })
   }
 
+  function postPlayToServer(event) {
+    // Get form data
+    const name = playName.value
+    const caption = playDescription.value
+
+    // Construct object that encapsulates name/caption to send to back end.
+    const playToSend = {
+      name: name,
+      caption: caption,
+      playData: playData
+    }
+
+    // Make post request and handle success callback
+    $http.post('/api/play', playToSend)
+      .then((res) => {
+        alert('Play saved successfully!')
+        currPlayName.innerHTML = `Current play: [${name}]`
+      })
+  }
+
+  function loadPlay(data) {
+    // Parse data from object
+    const playDataFromServer = data.playData
+    const totalFrameCount = getTotalFrameCount(playDataFromServer)
+
+    $scope.currFrame = totalFrameCount
+    $scope.totalFrames = totalFrameCount
+
+    // Change play data
+    playData = playDataFromServer
+    if (totalFrameCount > 1) {
+      const lastTransition = playDataFromServer.transitions[totalFrameCount - 2]
+      currTransition = initTransition(lastTransition)
+      renderState(parseStateFromTransition(lastTransition))
+    } else {
+      currTransition = initTransitionFromState(playDataFromServer.startState)
+      renderState(startState)
+      stageAnalysis.value = playDataFromServer.analysis[totalFrameCount - 2]
+    }
+
+    // Update name
+    currPlayName.innerHTML = `Current play: [${data.name}]`
+  }
+
   function init() {
     // Set active pen to MOVE
     penMove.classList.add('activePen')
@@ -546,26 +593,15 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       sendToServer.disabled = event.target.value.trim().length === 0
     )
 
-    sendToServer.addEventListener('click', (event) => {
-      // Get form data
-      const name = playName.value
-      const caption = playDescription.value
+    sendToServer.addEventListener('click', postPlayToServer)
 
-      const playToSend = {
-        name: name,
-        caption: caption,
-        playData: playData
-      }
+    // Initialise current play name
+    currPlayName.innerHTML = 'Current play: [untitled]'
 
-      $http.post('/api/play', playToSend)
-        .then((res) => {
-          alert('Success!')
-        })
-        .catch((res) => {
-          alert('Failed...')
-        })
-    })
-  }
+    // Check for input play and load if necessary
+    const inputPlay = $state.params.playData
+    if (inputPlay !== null) loadPlay(JSON.parse(inputPlay))
+  } 
 
   init()
 }])

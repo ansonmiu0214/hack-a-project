@@ -6,6 +6,7 @@ var app = angular.module('playmaker', ['ui.router']);
  * DOM elements
  */
 var court = document.getElementById('court');
+var currPlayName = document.getElementById('currPlayName');
 
 /**
  * Data initialisations
@@ -154,7 +155,10 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
   $stateProvider.state({
     name: 'dev',
     url: '/',
-    component: 'dev'
+    component: 'dev',
+    params: {
+      playData: null
+    }
   });
 
   $stateProvider.state({

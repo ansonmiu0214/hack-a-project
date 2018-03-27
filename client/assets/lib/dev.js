@@ -218,6 +218,9 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       if (count === maxCount) {
         resolve(true);
       } else {
+        // Update analysis
+        stageAnalysis.value = playData.analysis[count];
+
         // Initialise array of MovePlayer promises
         var playerMovements = [];
 
@@ -301,8 +304,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       target.classList.add('activePen');
       currentPen = target;
       currentPenType = PenTypes[target.id];
-      console.log(currentPenType);
     }
+
     event.preventDefault();
   }
 
@@ -486,8 +489,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     receiver.classList.add(BALL_ID);
   }
 
-  function getTotalFrameCount() {
-    return playData.transitions.length + 1;
+  function getTotalFrameCount(playDataObject) {
+    return playDataObject.transitions.length + 1;
   }
 
   function undoFrame(event) {
@@ -543,6 +546,48 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     });
   }
 
+  function postPlayToServer(event) {
+    // Get form data
+    var name = playName.value;
+    var caption = playDescription.value;
+
+    // Construct object that encapsulates name/caption to send to back end.
+    var playToSend = {
+      name: name,
+      caption: caption,
+      playData: playData
+
+      // Make post request and handle success callback
+    };$http.post('/api/play', playToSend).then(function (res) {
+      alert('Play saved successfully!');
+      currPlayName.innerHTML = 'Current play: [' + name + ']';
+    });
+  }
+
+  function loadPlay(data) {
+    // Parse data from object
+    var playDataFromServer = data.playData;
+    var totalFrameCount = getTotalFrameCount(playDataFromServer);
+
+    $scope.currFrame = totalFrameCount;
+    $scope.totalFrames = totalFrameCount;
+
+    // Change play data
+    playData = playDataFromServer;
+    if (totalFrameCount > 1) {
+      var lastTransition = playDataFromServer.transitions[totalFrameCount - 2];
+      currTransition = initTransition(lastTransition);
+      renderState(parseStateFromTransition(lastTransition));
+    } else {
+      currTransition = initTransitionFromState(playDataFromServer.startState);
+      renderState(startState);
+      stageAnalysis.value = playDataFromServer.analysis[totalFrameCount - 2];
+    }
+
+    // Update name
+    currPlayName.innerHTML = 'Current play: [' + data.name + ']';
+  }
+
   function init() {
     // Set active pen to MOVE
     penMove.classList.add('activePen');
@@ -573,23 +618,14 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       return sendToServer.disabled = event.target.value.trim().length === 0;
     });
 
-    sendToServer.addEventListener('click', function (event) {
-      // Get form data
-      var name = playName.value;
-      var caption = playDescription.value;
+    sendToServer.addEventListener('click', postPlayToServer);
 
-      var playToSend = {
-        name: name,
-        caption: caption,
-        playData: playData
-      };
+    // Initialise current play name
+    currPlayName.innerHTML = 'Current play: [untitled]';
 
-      $http.post('/api/play', { data: playToSend }).then(function (res) {
-        alert('Success!');
-      }).catch(function (res) {
-        alert('Failed...');
-      });
-    });
+    // Check for input play and load if necessary
+    var inputPlay = $state.params.playData;
+    if (inputPlay !== null) loadPlay(JSON.parse(inputPlay));
   }
 
   init();

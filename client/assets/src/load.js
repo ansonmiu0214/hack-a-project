@@ -16,7 +16,24 @@ app.controller('LoadController', ['$scope', '$http', '$location', '$state', ($sc
     if (plays.length === 0) return
 
     $scope.hasPlays = true
+    $scope.plays = plays
   })
+
+  function loadPlay(playID) {
+    // Get play and go to development state - passing data as parameter
+    $http.get(`/api/play?id=${playID}`)
+      .then((res) => {
+        const playString = JSON.stringify(res.data)
+        $state.go('dev', { playData: playString })
+      })
+  }
+
+  function deletePlay(playID) {
+    console.log(`Asked to delete ${playID}`)
+  }
+
+  $scope.loadPlay = loadPlay
+  $scope.deletePlay = deletePlay
     
   // Linking
   backBtn.addEventListener('click', (event) => $state.go('init'))

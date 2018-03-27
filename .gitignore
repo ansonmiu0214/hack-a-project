@@ -1,6 +1,9 @@
 # macOS temp files
 *.DS_Store
 
+# Dynamically rendered plays
+plays/
+
 # Logs
 logs
 *.log

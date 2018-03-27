@@ -7,8 +7,22 @@
       <p>It looks like you have not saved a play yet. Come back when you've written one. </p>
     </div>
 
-    <div ng-if="hasPlays">
-      
+    <div ng-if="hasPlays" class="mb-3">
+      <div ng-repeat="play in plays">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{play.name}}</h5>
+            <p class="card-text">{{play.caption.length == 0 ? "No description" : play.caption}}</p>
+
+            <!-- Load play button -->
+            <a href="" class="btn btn-primary" ng-click="loadPlay(play.id)">Load</a>
+
+            <!-- Delete play button -->
+            <a href="" class="btn btn-danger" ng-click="deletePlay(play.id)">Delete</a>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <a href="" id="backBtn" class="btn btn-secondary">Back</a>
