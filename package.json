@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ansonmiu0214/hack-a-project#readme",
   "dependencies": {
+    "crypto": "^1.0.1",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
     "yarn": "^1.5.1"
