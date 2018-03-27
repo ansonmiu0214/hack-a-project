@@ -1,0 +1,10 @@
+{
+  "name": "3-out",
+  "setup": {
+    "pg": { "x": 330, "y": 350, "hasBall": true},
+    "sg": { "x": 100, "y": 280, "hasBall": false},
+    "sf": { "x": 560, "y": 280, "hasBall": false},
+    "pf": { "x": 250, "y": 200, "hasBall": false},
+    "c":  { "x": 400, "y": 100, "hasBall": false}
+  }
+}

@@ -8,6 +8,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   
   // DOM elements
   const divBallHandler = document.getElementById('ballHandlers')
+  const divZoneSetup = document.getElementById('zoneSetup')
   const btnResetState = document.getElementById('resetState')
   const btnSaveState = document.getElementById('saveState')
 
@@ -82,8 +83,9 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   }
 
   function generatePlayers() {
-    for (let player in defaultConfig) {
-      const coord = defaultConfig[player]
+    const config = $scope.zones[defaultZone]
+    for (let player in config) {
+      const coord = config[player]
 
       const marker = document.createElement('div')
       marker.id = player
@@ -119,11 +121,18 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     startState[curr].hasBall = false
     startState[next].hasBall = true
   }
+
+  function changedInitZone(event) {
+    const next = event.target.value
+
+    console.log(next)
+    startState = $scope.zones[next]
+
+    console.log(startState)
+    renderState(startState)
+  }
   
   function init() {
-    // Render players
-    generatePlayers()
-
     // Populate radio button for initial ball handler
     for (let player in defaultConfig) {
       const formCheck = document.createElement('div')
@@ -139,24 +148,35 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
       divBallHandler.appendChild(formCheck) 
     }
 
-    const zoneArray = ['2-1-2', '1-3-1', '4-out']
-    zoneArray.forEach((elem, index) => {
-      const zoneOption = document.createElement('div')
-      zoneOption.className = 'form-check'
-
-      zoneOption.innerHTML = `<input class="form-check-input zoneRadio"
-      type="radio" name="zoneRadio" id="radio_${elem}" 
-      value="${elem}">`
-      zoneOption.innerHTML += `<label class="form-check-label" 
-      for="radio_${elem}">${elem}</label>`
-
-      document.getElementById('zoneSetup').appendChild(zoneOption)
-    })
-
     // Add onclick callback for all ball handler radio inputs
     document.querySelectorAll('.ballHandlerRadio')
       .forEach((radio, index) => radio.addEventListener('change', changedInitBallHandler))
 
+    // Load in standard formations from API
+    $http.get('/api/zones').then((res) => {
+      // Save to scope variable
+      $scope.zones = res.data
+
+      for (let zone in res.data) {
+        const zoneOption = document.createElement('div')
+        zoneOption.className = 'form-check'
+  
+        zoneOption.innerHTML = `<input class="form-check-input zoneRadio"
+          type="radio" name="zoneRadio" id="radio_${zone}" 
+          value="${zone}" ${zone === defaultZone ? "checked" : ""}>`
+        zoneOption.innerHTML += `<label class="form-check-label" 
+          for="radio_${zone}">${zone}</label>`
+  
+        divZoneSetup.appendChild(zoneOption) 
+      }      
+
+      document.querySelectorAll('.zoneRadio')
+        .forEach((radio, index) => radio.addEventListener('change', changedInitZone))
+
+      // Render players
+      generatePlayers()
+    })
+    
     btnResetState.addEventListener('click', resetDefaultState)
     btnSaveState.addEventListener('click', saveDefaultState)
   }

@@ -10,6 +10,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
 
   // DOM elements
   var divBallHandler = document.getElementById('ballHandlers');
+  var divZoneSetup = document.getElementById('zoneSetup');
   var btnResetState = document.getElementById('resetState');
   var btnSaveState = document.getElementById('saveState');
 
@@ -83,8 +84,9 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
   }
 
   function generatePlayers() {
-    for (var player in defaultConfig) {
-      var coord = defaultConfig[player];
+    var config = $scope.zones[defaultZone];
+    for (var player in config) {
+      var coord = config[player];
 
       var marker = document.createElement('div');
       marker.id = player;
@@ -121,10 +123,17 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
     startState[next].hasBall = true;
   }
 
-  function init() {
-    // Render players
-    generatePlayers();
+  function changedInitZone(event) {
+    var next = event.target.value;
 
+    console.log(next);
+    startState = $scope.zones[next];
+
+    console.log(startState);
+    renderState(startState);
+  }
+
+  function init() {
     // Populate radio button for initial ball handler
     for (var player in defaultConfig) {
       var formCheck = document.createElement('div');
@@ -137,20 +146,32 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', func
       divBallHandler.appendChild(formCheck);
     }
 
-    var zoneArray = ['2-1-2', '1-3-1', '4-out'];
-    zoneArray.forEach(function (elem, index) {
-      var zoneOption = document.createElement('div');
-      zoneOption.className = 'form-check';
-
-      zoneOption.innerHTML = '<input class="form-check-input zoneRadio"\n      type="radio" name="zoneRadio" id="radio_' + elem + '" \n      value="' + elem + '">';
-      zoneOption.innerHTML += '<label class="form-check-label" \n      for="radio_' + elem + '">' + elem + '</label>';
-
-      document.getElementById('zoneSetup').appendChild(zoneOption);
-    });
-
     // Add onclick callback for all ball handler radio inputs
     document.querySelectorAll('.ballHandlerRadio').forEach(function (radio, index) {
       return radio.addEventListener('change', changedInitBallHandler);
+    });
+
+    // Load in standard formations from API
+    $http.get('/api/zones').then(function (res) {
+      // Save to scope variable
+      $scope.zones = res.data;
+
+      for (var zone in res.data) {
+        var zoneOption = document.createElement('div');
+        zoneOption.className = 'form-check';
+
+        zoneOption.innerHTML = '<input class="form-check-input zoneRadio"\n          type="radio" name="zoneRadio" id="radio_' + zone + '" \n          value="' + zone + '" ' + (zone === defaultZone ? "checked" : "") + '>';
+        zoneOption.innerHTML += '<label class="form-check-label" \n          for="radio_' + zone + '">' + zone + '</label>';
+
+        divZoneSetup.appendChild(zoneOption);
+      }
+
+      document.querySelectorAll('.zoneRadio').forEach(function (radio, index) {
+        return radio.addEventListener('change', changedInitZone);
+      });
+
+      // Render players
+      generatePlayers();
     });
 
     btnResetState.addEventListener('click', resetDefaultState);

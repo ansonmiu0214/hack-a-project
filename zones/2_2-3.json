@@ -1,0 +1,10 @@
+{
+  "name": "2-3",
+  "setup": {
+    "pg": { "x": 215, "y": 380, "hasBall": true},
+    "sg": { "x": 445, "y": 380, "hasBall": false},
+    "sf": { "x": 75,  "y": 80, "hasBall": false},
+    "pf": { "x": 600, "y": 80, "hasBall": false},
+    "c":  { "x": 330, "y": 80, "hasBall": false}
+  }
+}

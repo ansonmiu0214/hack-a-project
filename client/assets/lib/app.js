@@ -63,6 +63,7 @@ var PLAYER_ID = 'player';
 var BALL_ID = 'ballhandler';
 var PASS_PATH_LENGTH = 50;
 var PASS_TIMEOUT = PASS_MILLIS / PASS_PATH_LENGTH;
+var defaultZone = '3-out';
 
 // Global functions
 function renderState(state) {
