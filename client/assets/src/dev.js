@@ -399,34 +399,32 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       const ball = document.createElement('div')
       ball.classList.add('ball')
 
-      setTimeout(() => {
-        // Generate path
-        const path = []
-        const total_dx = receiverCoord.x - passerCoord.x
-        const total_dy = receiverCoord.y - passerCoord.y
-        const dx = total_dx / PASS_PATH_LENGTH
-        const dy = total_dy / PASS_PATH_LENGTH
-        for (let i = 0; i < PASS_PATH_LENGTH; ++i)
-          path.push({ x: dx, y: dy })
-    
-        // Set offsets and data-attrs
-        ball.setAttribute('style', `left: ${passerCoord.x}px; top: ${passerCoord.y}px`)
-        ball.setAttribute('data-x', 0)
-        ball.setAttribute('data-y', 0)
-        court.appendChild(ball)
+      // Generate path
+      const path = []
+      const total_dx = receiverCoord.x - passerCoord.x
+      const total_dy = receiverCoord.y - passerCoord.y
+      const dx = total_dx / PASS_PATH_LENGTH
+      const dy = total_dy / PASS_PATH_LENGTH
+      for (let i = 0; i < PASS_PATH_LENGTH; ++i)
+        path.push({ x: dx, y: dy })
+  
+      // Set offsets and data-attrs
+      ball.setAttribute('style', `left: ${passerCoord.x}px; top: ${passerCoord.y}px`)
+      ball.setAttribute('data-x', 0)
+      ball.setAttribute('data-y', 0)
+      court.appendChild(ball)
 
-        // Animate pass
-        animatePassBall(ball, path).then((val) => {
-          // Remove ball from court
-          court.removeChild(ball)
+      // Animate pass
+      animatePassBall(ball, path).then((val) => {
+        // Remove ball from court
+        court.removeChild(ball)
 
-          // Update passer CSS representation
-          renderPass(passer, receiver)
+        // Update passer CSS representation
+        renderPass(passer, receiver)
 
-          // Signal parent
-          resolve(true)
-        })
-      }, 300)
+        // Signal parent
+        resolve(true)
+      })
     })
   }
 
