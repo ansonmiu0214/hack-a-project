@@ -55,7 +55,7 @@
   user-select         : none;
 }
 
-.player, .penButton, .stageButton, .playButton, .initButton {
+.player {
   background-image: radial-gradient(var(--marker-bg-color) 0%, var(--marker-bg-color) 30%, black 100%);
 }
 
@@ -92,10 +92,10 @@ a {
 }
 
 /* Use hover property to show passing option */
-.penButton:hover, 
+/* .penButton:hover, 
 .stageButton:hover,
 .playButton:hover,
-.activePen, 
+.activePen,  */
 .passCandidate:hover > div {
   background-image: radial-gradient(var(--ballhandler-bg-color) 0%, var(--ballhandler-bg-color) 30%, black 100%);
   color: var(--ballhandler-txt-color);
@@ -105,13 +105,23 @@ a {
   text-align: center;
 }
 
-.penButton, .stageButton, .playButton, .initButton {
+.ctrlWrapper > a {
   display: block;
+  border: 1px solid black;
+  border-radius: 50%;
+  box-shadow: 0.5px 0.5px 1px;
   padding-top: 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50%;
 }
 
-.penButton, .initButton {
-  border-radius: 50%;
+#resetState {
+  background-image: url('/assets/media/reset.png');
+}
+
+#loadPlay {
+  background-image: url('/assets/media/load.png');
 }
 
 #undoFrame {
@@ -122,11 +132,23 @@ a {
   background-image: url('/assets/media/add.png');
 }
 
+#move {
+  background-image: url('/assets/media/move.png');
+}
+
+#screen {
+  background-image: url('/assets/media/screen.png');
+}
+
+#pass {
+  background-image: url('/assets/media/pass.png');
+}
+
 #replay {
   background-image: url('/assets/media/replay.png');
 }
 
-#savePlay {
+#saveState, #savePlay {
   background-image: url('/assets/media/save.png');
 }
 
@@ -137,3 +159,8 @@ a {
  #frameIndicator {
    text-align: center;
  }
+
+ .activeButton, .ctrlWrapper >  a:hover {
+  background-image: radial-gradient(var(--ballhandler-bg-color) 0%, var(--ballhandler-bg-color) 30%, black 100%) !important;
+  background-size: cover !important;
+}

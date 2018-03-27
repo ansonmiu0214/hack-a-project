@@ -188,19 +188,16 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   }
 
   function replay(event) {
-    btnReplay.classList.add('active');
-    btnReplay.disabled = true;
-
     // Render start state
     renderState(startState);
 
+    $scope.$apply(function () {
+      return $scope.currFrame = 0;
+    });
+
     // Replay frames denoting maximum frame count
     var frameCount = playData.transitions.length;
-    replayFrames(startState, playData.transitions, frameCount).then(function (val) {
-      // Re-enable replay button upon completion
-      btnReplay.classList.remove('active');
-      btnReplay.disabled = false;
-    });
+    replayFrames(startState, playData.transitions, frameCount);
   }
 
   /**
@@ -214,6 +211,10 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     var isForward = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
     return new Promise(function (resolve, reject) {
+      $scope.$apply(function () {
+        return $scope.currFrame++;
+      });
+
       // Base case: no more frames to replay
       if (count === maxCount) {
         resolve(true);
@@ -300,8 +301,8 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
       if (currentPen === penPass) disablePassMode();
       if (target == penPass) enablePassMode();
 
-      currentPen.classList.remove('activePen');
-      target.classList.add('activePen');
+      currentPen.classList.remove(ACTIVE_BTN);
+      target.classList.add(ACTIVE_BTN);
       currentPen = target;
       currentPenType = PenTypes[target.id];
     }
@@ -532,11 +533,6 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     var currState = $scope.currFrame === 1 ? startState : parseStateFromTransition(playData.transitions[$scope.currFrame - 2]);
 
     replayFrames(currState, playData.transitions, $scope.currFrame, $scope.currFrame - 1).then(function (val) {
-      // Update scope frame number
-      $scope.$apply(function () {
-        return $scope.currFrame++;
-      });
-
       // Refresh analysis
       var nextAnalysis = playData.analysis[$scope.currFrame - 1];
       stageAnalysis.value = nextAnalysis ? nextAnalysis : '';
@@ -590,7 +586,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
 
   function init() {
     // Set active pen to MOVE
-    penMove.classList.add('activePen');
+    penMove.classList.add(ACTIVE_BTN);
     currentPen = penMove;
     currentPenType = PenTypes[currentPen.id];
 

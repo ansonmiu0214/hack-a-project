@@ -62,6 +62,7 @@ const SMOOTHNESS        = 2
 const COURT_ID          = 'court'
 const PLAYER_ID         = 'player'
 const BALL_ID           = 'ballhandler'
+const ACTIVE_BTN        = 'activeButton'
 const PASS_PATH_LENGTH  = 50
 const PASS_TIMEOUT      = PASS_MILLIS / PASS_PATH_LENGTH
 const defaultZone       = '3-out'

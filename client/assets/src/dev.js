@@ -181,20 +181,14 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   }
 
   function replay(event) {
-    btnReplay.classList.add('active')
-    btnReplay.disabled = true
-
     // Render start state
     renderState(startState)
+
+    $scope.$apply(() => $scope.currFrame = 0)
 
     // Replay frames denoting maximum frame count
     const frameCount = playData.transitions.length
     replayFrames(startState, playData.transitions, frameCount)
-      .then((val) => {
-        // Re-enable replay button upon completion
-        btnReplay.classList.remove('active')
-        btnReplay.disabled = false
-      })
   }
 
   /**
@@ -205,10 +199,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
    */
   function replayFrames(prevState, transitions, maxCount, count = 0, isForward = true) {
     return new Promise((resolve, reject) => {
+      $scope.$apply(() => $scope.currFrame++)
+      
       // Base case: no more frames to replay
       if (count === maxCount) {
         resolve(true)
-      } else {
+      } else { 
         // Update analysis
         stageAnalysis.value = playData.analysis[count]
 
@@ -286,12 +282,12 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
       if (currentPen === penPass) disablePassMode()
       if (target == penPass) enablePassMode()
 
-      currentPen.classList.remove('activePen')
-      target.classList.add('activePen')
+      currentPen.classList.remove(ACTIVE_BTN)
+      target.classList.add(ACTIVE_BTN)
       currentPen = target
       currentPenType = PenTypes[target.id]
     }
-    
+
     event.preventDefault()
   }
 
@@ -509,9 +505,6 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
     replayFrames(currState, playData.transitions, $scope.currFrame, $scope.currFrame - 1)
       .then((val) => {
-        // Update scope frame number
-        $scope.$apply(() => $scope.currFrame++)
-
         // Refresh analysis
         const nextAnalysis = playData.analysis[$scope.currFrame - 1]
         stageAnalysis.value = nextAnalysis ? nextAnalysis : ''
@@ -567,7 +560,7 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
 
   function init() {
     // Set active pen to MOVE
-    penMove.classList.add('activePen')
+    penMove.classList.add(ACTIVE_BTN)
     currentPen = penMove
     currentPenType = PenTypes[currentPen.id]
 

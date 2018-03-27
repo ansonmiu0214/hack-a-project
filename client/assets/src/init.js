@@ -124,12 +124,11 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   }
 
   function changedInitZone(event) {
+    // Get next zone ID
     const next = event.target.value
 
-    console.log(next)
+    // Change start state and render
     startState = $scope.zones[next]
-
-    console.log(startState)
     renderState(startState)
   }
   
