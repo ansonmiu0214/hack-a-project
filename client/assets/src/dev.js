@@ -559,6 +559,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   }
 
   function init() {
+    // Preload image
+    const img = new Image()
+    img.onload = () => console.log('Loaded image')
+    img.src = '/assets/media/basketball.png'
+    
     // Set active pen to MOVE
     penMove.classList.add(ACTIVE_BTN)
     currentPen = penMove
