@@ -54,6 +54,23 @@ app.get('/api/play', (req, res) => {
   res.send(playObj)
 })
 
+app.delete('/api/play', (req, res) => {
+  // Parse hash
+  const hash = req.query.id
+  
+  // Construct path
+  const path = `${PLAY_DIR}/${hash}.json`
+
+  // Check for existence
+  if (!fs.existsSync(path)) {
+    res.sendStatus(404)
+    return
+  }
+
+  fs.unlinkSync(path)
+  res.sendStatus(200)
+})
+
 app.get('/api/plays', (req, res) => {
   const plays = []
 

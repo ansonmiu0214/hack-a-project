@@ -20,7 +20,7 @@ var rightWing = { x: 650, y: 200, name: 'right wing' };
 var leftElbow = { x: 300, y: 380, name: 'left elbow' };
 var topOfKey = { x: 400, y: 380, name: 'top of the key' };
 var rightElbow = { x: 650, y: 380, name: 'right elbow' };
-var midCourt = { x: 650, y: 530, name: 'mid-cour' };
+var midCourt = { x: 650, y: 530, name: 'mid-court' };
 var backCourt = { x: 650, y: 1130, name: 'back-court' };
 
 var zones = [leftWing, leftBlock, rightBlock, rightWing, leftElbow, topOfKey, rightElbow, midCourt, backCourt];

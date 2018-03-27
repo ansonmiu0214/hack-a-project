@@ -9,15 +9,17 @@ app.controller('LoadController', ['$scope', '$http', '$location', '$state', ($sc
    */
   const backBtn = document.getElementById('backBtn')
 
-  // Get plays from back-end
-  $http.get('/api/plays').then((res) => {    
-    console.log(res.data)
-    const plays = res.data
-    if (plays.length === 0) return
+  function getPlays() {
+    // Get plays from back-end
+    $http.get('/api/plays').then((res) => {    
+      console.log(res.data)
+      const plays = res.data
+      if (plays.length === 0) return
 
-    $scope.hasPlays = true
-    $scope.plays = plays
-  })
+      $scope.hasPlays = true
+      $scope.plays = plays
+    })
+  }
 
   function loadPlay(playID) {
     // Get play and go to development state - passing data as parameter
@@ -29,9 +31,15 @@ app.controller('LoadController', ['$scope', '$http', '$location', '$state', ($sc
   }
 
   function deletePlay(playID) {
-    console.log(`Asked to delete ${playID}`)
+    $http.delete(`/api/play?id=${playID}`)
+      .then((res) => {
+        alert('Successfully deleted play.')
+        getPlays()
+      })
+      .catch((err) => alert('Could not delete play.'))
   }
 
+  getPlays()
   $scope.loadPlay = loadPlay
   $scope.deletePlay = deletePlay
     
