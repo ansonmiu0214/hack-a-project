@@ -175,6 +175,9 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
 
       // Render players
       generatePlayers()
+
+      // Set up start state as per default state
+      startState = JSON.parse(JSON.stringify($scope.zones[defaultZone]))
     })
     
     btnResetState.addEventListener('click', resetDefaultState)

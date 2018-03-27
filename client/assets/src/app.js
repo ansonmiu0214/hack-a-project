@@ -44,7 +44,7 @@ const newTransition = Object.freeze({
   c:  { path: [], pen: 0, timeout: 0, nextState: {} }
 })
 
-let startState = JSON.parse(JSON.stringify(defaultConfig))
+let startState = null
 let lastState = null
 let currTransition = JSON.parse(JSON.stringify(newTransition))
 
