@@ -29,6 +29,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
   const btnReplay = document.getElementById('replay')
   const btnSavePlay = document.getElementById('savePlay')
   const btnExportPlay = document.getElementById('exportPlay')
+
+  // DOM - save modal
+  const playName = document.getElementById('playName')
+  const playDescription = document.getElementById('playDescription')
+  const sendToServer = document.getElementById('sendPlayToServer')
   
   // Pen
   let currentPen = null
@@ -536,6 +541,30 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', ($sco
     btnPrevFrame.addEventListener('click', goToPrevFrame)
     btnNextFrame.addEventListener('click', goToNextFrame)
     btnReplay.addEventListener('click', replay)
+
+    playName.addEventListener('keyup', (event) => 
+      sendToServer.disabled = event.target.value.trim().length === 0
+    )
+
+    sendToServer.addEventListener('click', (event) => {
+      // Get form data
+      const name = playName.value
+      const caption = playDescription.value
+
+      const playToSend = {
+        name: name,
+        caption: caption,
+        playData: playData
+      }
+
+      $http.post('/api/play', playToSend)
+        .then((res) => {
+          alert('Success!')
+        })
+        .catch((res) => {
+          alert('Failed...')
+        })
+    })
   }
 
   init()

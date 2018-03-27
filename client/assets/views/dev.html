@@ -73,8 +73,9 @@
           <a class="playButton" id="replay"></a>Replay
         </div>
         <div class="col ctrlWrapper">
-          <a class="playButton" id="savePlay"></a>Save
+          <a class="playButton" id="savePlay" data-toggle="modal" data-target="#savePlayModal"></a>Save
         </div>
+
         <div class="col ctrlWrapper">
           <a class="playButton" id="exportPlay"></a>Export
         </div>
@@ -82,8 +83,37 @@
     </div>
 
   </div> <!-- // ng-if (replay mode) -->
-    
 </div> <!-- // .ctrl-card (play) -->
+
+<!-- Save Play Modal -->
+<div class="modal fade" id="savePlayModal" tabindex="-1" role="dialog" aria-labelledby="savePlayModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="savePlayModalLabel">Save Play</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="playName">Name of play</label>
+            <input type="text" class="form-control" id="playName" required>
+          </div>
+          <div class="form-group">
+            <label for="playDescription">Description of play</label>
+            <textarea class="form-control" id="playDescription" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="sendPlayToServer" disabled>Save Play</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- <div class="card ctrl-card">
   <h5 class="card-header">Stages</h5>

@@ -32,6 +32,11 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
   var btnSavePlay = document.getElementById('savePlay');
   var btnExportPlay = document.getElementById('exportPlay');
 
+  // DOM - save modal
+  var playName = document.getElementById('playName');
+  var playDescription = document.getElementById('playDescription');
+  var sendToServer = document.getElementById('sendPlayToServer');
+
   // Pen
   var currentPen = null;
   var currentPenType = 0;
@@ -563,6 +568,28 @@ app.controller('DevController', ['$scope', '$http', '$location', '$state', funct
     btnPrevFrame.addEventListener('click', goToPrevFrame);
     btnNextFrame.addEventListener('click', goToNextFrame);
     btnReplay.addEventListener('click', replay);
+
+    playName.addEventListener('keyup', function (event) {
+      return sendToServer.disabled = event.target.value.trim().length === 0;
+    });
+
+    sendToServer.addEventListener('click', function (event) {
+      // Get form data
+      var name = playName.value;
+      var caption = playDescription.value;
+
+      var playToSend = {
+        name: name,
+        caption: caption,
+        playData: playData
+      };
+
+      $http.post('/api/play', { data: playToSend }).then(function (res) {
+        alert('Success!');
+      }).catch(function (res) {
+        alert('Failed...');
+      });
+    });
   }
 
   init();

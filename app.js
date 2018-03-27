@@ -44,7 +44,9 @@ app.get('/api/plays', (req, res) => {
 
 // Save new play to server
 app.post('/api/play', (req, res) => {
-  
+  const play = req.body.data
+  console.log(play)
+  res.send(true)
 })
 
 // Landing
