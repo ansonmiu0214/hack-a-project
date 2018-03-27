@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "build": "cd client/ && yarn build",
+    "postinstall": "cd client && bower install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
