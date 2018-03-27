@@ -55,7 +55,7 @@
   user-select         : none;
 }
 
-.player, .penButton, .stageButton, .playButton {
+.player, .penButton, .stageButton, .playButton, .initButton {
   background-image: radial-gradient(var(--marker-bg-color) 0%, var(--marker-bg-color) 30%, black 100%);
 }
 
@@ -105,12 +105,12 @@ a {
   text-align: center;
 }
 
-.penButton, .stageButton, .playButton {
+.penButton, .stageButton, .playButton, .initButton {
   display: block;
   padding-top: 100%;
 }
 
-.penButton {
+.penButton, .initButton {
   border-radius: 50%;
 }
 

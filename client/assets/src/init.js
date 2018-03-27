@@ -11,6 +11,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   const divZoneSetup = document.getElementById('zoneSetup')
   const btnResetState = document.getElementById('resetState')
   const btnSaveState = document.getElementById('saveState')
+  const btnLoadPlay = document.getElementById('loadPlay')
 
   // Implement draggable via interactjs for players
   interact('.player').draggable({
@@ -64,7 +65,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
   }
 
   function resetDefaultState(event) {
-    renderState(defaultConfig)
+    renderState($scope.zones[defaultZone])
     event.preventDefault()
   }
   
@@ -179,6 +180,7 @@ app.controller('InitController', ['$scope', '$http', '$location', '$state', ($sc
     
     btnResetState.addEventListener('click', resetDefaultState)
     btnSaveState.addEventListener('click', saveDefaultState)
+    btnLoadPlay.addEventListener('click', (event) => $state.go('load'))
   }
 
   /**

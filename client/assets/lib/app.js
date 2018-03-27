@@ -126,17 +126,6 @@ function getZone(coord) {
   return null;
 }
 
-// Global events
-document.getElementById('saveJSON').addEventListener('click', function (event) {
-  var dataAsString = JSON.stringify(playData, null, 4);
-  var data = 'text/json;charset=utf-8,' + encodeURIComponent(dataAsString);
-  var dl = document.createElement('a');
-  dl.href = 'data:' + data;
-  dl.download = 'play.json';
-  document.body.appendChild(dl);
-  dl.click();
-});
-
 // Components
 app.component('init', {
   templateUrl: '/assets/views/init.html',
@@ -146,6 +135,11 @@ app.component('init', {
 app.component('dev', {
   templateUrl: '/assets/views/dev.html',
   controller: 'DevController'
+});
+
+app.component('load', {
+  templateUrl: '/assets/views/load.html',
+  controller: 'LoadController'
 });
 
 // States
@@ -163,6 +157,27 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
     component: 'dev'
   });
 
+  $stateProvider.state({
+    name: 'load',
+    url: '/',
+    component: 'load'
+  });
+
   // Default route
   $urlRouterProvider.otherwise('/');
 }]);
+
+// Global events
+document.getElementById('homeButton').addEventListener('click', function (event) {
+  return window.location = '/';
+});
+
+// document.getElementById('saveJSON').addEventListener('click', (event) => {
+//   const dataAsString = JSON.stringify(playData, null, 4)
+//   const data = `text/json;charset=utf-8,${encodeURIComponent(dataAsString)}`
+//   const dl = document.createElement('a')
+//   dl.href = `data:${data}`
+//   dl.download = 'play.json'
+//   document.body.appendChild(dl)
+//   dl.click()
+// })

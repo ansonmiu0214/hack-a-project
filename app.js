@@ -38,6 +38,10 @@ app.get('/api/play', (req, res) => {
   
 })
 
+app.get('/api/plays', (req, res) => {
+  res.send([2,3])
+})
+
 // Save new play to server
 app.post('/api/play', (req, res) => {
   
