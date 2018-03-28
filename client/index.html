@@ -39,23 +39,37 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-      <a class="navbar-brand" id="homeButton" href="">Playmaker</a>
+      <a class="navbar-brand" id="homeButton" href="">
+        Playmaker
+      </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <span class="navbar-text" id="currPlayName"></span>
+      <span class="appData navbar-text" id="currPlayName"></span>
     </div> <!-- // .container -->
   </nav> <!-- // nav -->
 
   <!-- Content -->
   <div class="container">
-    <div id="wrapper">
+    <div class="errorMessage">
+      <div class="alert alert-danger mt-3" role="alert">
+        <h4 class="alert-heading">Timeout!</h4>
+        <p>Your screen is not wide enough to display the Playmaker interface at this current release.</p>
+        <hr>
+        <p class="mb-0">Tip: try your luck on a laptop/desktop screen!</p>
+        </div>
+    </div>
+
+    <div class="appData">
+      <div id="wrapper">
         <div class="wrapper-component" id="court">
         </div> <!-- // #court -->
         <div class="wrapper-component" id="ctrls">
           <ui-view></ui-view>
         </div> <!-- // #ctrls -->
       </div> <!-- // #wrapper -->
+    </div>
+    
   </div> <!-- // .container -->
   
   <!-- External dependencies -->

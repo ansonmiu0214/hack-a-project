@@ -164,3 +164,23 @@ a {
   background-image: radial-gradient(var(--ballhandler-bg-color) 0%, var(--ballhandler-bg-color) 30%, black 100%) !important;
   background-size: cover !important;
 }
+
+@media only screen and (max-width: 1200px) {
+  .errorMessage {
+    display: block;
+  }
+
+  .appData {
+    display: none;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  .errorMessage {
+    display: none;
+  }
+
+  .appData {
+    display: block;
+  }
+}
