@@ -101,6 +101,9 @@ app.post('/api/play', (req, res) => {
   // Apply hash on name
   const playID = crypto.createHash('md5').update(play.name).digest('hex')
 
+  // Create directory for plays if does not exist
+  if (!fs.existsSync(PLAY_DIR)) fs.mkdirSync(PLAY_DIR)
+
   // Write to file
   fs.writeFileSync(`${PLAY_DIR}/${playID}.json`, JSON.stringify(play, null, 2), 'utf8')
 
